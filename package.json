@@ -1,0 +1,14 @@
+{
+  "name": "poc-gh-release-tags-workflow",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Running tests...\"",
+    "build": "echo \"Building app...\"",
+    "lint": "echo \"Linting files...\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

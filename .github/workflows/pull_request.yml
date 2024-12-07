@@ -1,0 +1,43 @@
+name: Pull Request
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      
+jobs:
+  preview-deployment:
+    runs-on: ubuntu-latest
+    environment:
+      name: Development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run build
+        run: npm run build
+
+      - name: Deploy preview to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
+        run: |
+          BRANCH_NAME=${{ github.head_ref }}
+          npx vercel --scope $VERCEL_TEAM --token $VERCEL_TOKEN --branch $BRANCH_NAME
