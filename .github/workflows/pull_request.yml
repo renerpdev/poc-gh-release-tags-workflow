@@ -14,7 +14,7 @@ env:
   VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
 
 jobs:
-  preview-deployment:
+  Preview-Deployment:
     runs-on: ubuntu-latest
     environment:
       name: Development
@@ -40,7 +40,7 @@ jobs:
       - name: Run build
         run: npm run build
 
-      - name: Deploy preview to Vercel
+      - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
 
       - name: Build Project Artifacts
