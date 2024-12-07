@@ -6,7 +6,6 @@ on:
       - opened
       - synchronize
       - reopened
-      - closed
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
