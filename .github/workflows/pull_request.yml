@@ -6,7 +6,11 @@ on:
       - opened
       - synchronize
       - reopened
-      
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
 jobs:
   preview-deployment:
     runs-on: ubuntu-latest
@@ -40,4 +44,5 @@ jobs:
           VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
         run: |
           BRANCH_NAME=${{ github.head_ref }}
-          npx vercel --scope $VERCEL_TEAM --token $VERCEL_TOKEN --branch $BRANCH_NAME
+          # For teams please add `--scope your-team-name`
+          npx vercel --token $VERCEL_TOKEN --branch $BRANCH_NAME
