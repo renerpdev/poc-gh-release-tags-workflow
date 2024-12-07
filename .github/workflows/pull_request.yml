@@ -10,6 +10,8 @@ on:
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
 
 jobs:
   preview-deployment:
@@ -39,10 +41,10 @@ jobs:
         run: npm run build
 
       - name: Deploy preview to Vercel
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
-        run: |
-          BRANCH_NAME=${{ github.head_ref }}
-          # For teams please add `--scope your-team-name`
-          npx vercel --token $VERCEL_TOKEN --branch $BRANCH_NAME
+        run: vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+
+      - name: Build Project Artifacts
+        run: vercel build --token=$VERCEL_TOKEN
+        
+      - name: Deploy Project Artifacts to Vercel
+        run: vercel deploy --prebuilt --token=$VERCEL_TOKEN
