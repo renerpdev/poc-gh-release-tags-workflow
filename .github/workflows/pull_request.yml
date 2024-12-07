@@ -6,6 +6,10 @@ on:
       - opened
       - synchronize
       - reopened
+    push:
+      branches:
+        - main
+
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -14,7 +18,7 @@ env:
   VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
 
 jobs:
-  Preview-Deployment:
+  Deployment:
     runs-on: ubuntu-latest
     environment:
       name: Development
@@ -35,16 +39,26 @@ jobs:
         run: npm test
 
       - name: Run linter
-        run: npm run lint
+        run: npm run lint --quiet
 
       - name: Run build
         run: npm run build
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+          else
+            vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+          fi
 
       - name: Build Project Artifacts
         run: vercel build --token=$VERCEL_TOKEN
         
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --token=$VERCEL_TOKEN
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            vercel deploy --prod --prebuilt --token=$VERCEL_TOKEN
+          else
+            vercel deploy --prebuilt --token=$VERCEL_TOKEN
+          fi
