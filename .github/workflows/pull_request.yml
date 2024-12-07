@@ -16,6 +16,8 @@ env:
 jobs:
   Preview-Deployment:
     runs-on: ubuntu-latest
+    environment:
+      name: Development
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
