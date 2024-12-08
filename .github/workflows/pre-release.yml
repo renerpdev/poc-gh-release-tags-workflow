@@ -33,7 +33,6 @@ jobs:
 
       - run: npm install
       - run: npm test
-      - run: npm run build
 
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
@@ -49,4 +48,4 @@ jobs:
           overwrite: true
 
       - name: Deploy to Vercel
-        run: vercel deploy --prebuild --prod --token=$VERCEL_TOKEN
+        run: vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
