@@ -18,6 +18,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
       - name: Call Preview Development Workflow
         if: ${{ github.event.inputs.workflow_name == 'deploy-preview-development.yml' }}
         uses: ./.github/workflows/deploy-preview-development.yml
