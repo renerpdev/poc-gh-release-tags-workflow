@@ -16,7 +16,8 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   
 jobs:
-  download-assets:
+  Download-Assets:
+    if: github.event.release.prerelease == false
     runs-on: ubuntu-latest
     outputs:
       assets-dir: ${{ steps.output-assets.outputs.assets-dir }}
@@ -42,7 +43,6 @@ jobs:
   Deploy-Production:
     needs: download-assets
     runs-on: ubuntu-latest
-    if: github.event.release.prerelease == 'false'
     environment:
       name: Production
     steps:

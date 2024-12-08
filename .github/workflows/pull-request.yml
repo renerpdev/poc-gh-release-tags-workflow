@@ -14,7 +14,7 @@ env:
   VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
 
 jobs:
-  Preview-Deployment:
+  Preview-Development:
     runs-on: ubuntu-latest
     environment:
       name: Preview-Development

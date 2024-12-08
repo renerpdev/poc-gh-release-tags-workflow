@@ -12,7 +12,7 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 jobs:
-  Deployment:
+  Deploy-Development:
     if: github.event.pull_request.merged == true # Ensure the job only runs if the PR is merged
     runs-on: ubuntu-latest
     environment:

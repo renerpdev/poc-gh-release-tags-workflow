@@ -18,6 +18,7 @@ env:
   
 jobs:
   Deploy-Staging:
+    if: github.event.release.prerelease == true
     runs-on: ubuntu-latest
     environment:
       name: Staging
