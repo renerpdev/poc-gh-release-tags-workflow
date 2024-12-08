@@ -9,6 +9,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
+permissions:
+  contents: write       # Allows access to repo contents
+
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -17,7 +20,6 @@ env:
   
 jobs:
   Download-Assets:
-    if: github.event.release.prerelease == false
     runs-on: ubuntu-latest
     outputs:
       assets-dir: ${{ steps.output-assets.outputs.assets-dir }}
@@ -32,9 +34,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: app-build
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           path: ${{ steps.output-assets.outputs.assets-dir }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: List downloaded assets
         run: ls -R ${{ steps.output-assets.outputs.assets-dir }}
@@ -60,4 +61,4 @@ jobs:
       - name: Deploy to Vercel
         run: |
           echo "Deploying with assets from pre-release..."
-          vercel deploy --prod --token=$VERCEL_TOKEN --files=$GITHUB_WORKSPACE/release-assets
+          vercel deploy --prod --token=$VERCEL_TOKEN --files=$GITHUB_WORKSPACE/$assets-dir

@@ -41,11 +41,12 @@ jobs:
       - name: Make a Vercel Build
         run: vercel build --prod --token=$VERCEL_TOKEN
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: app-build
           path: .vercel/output
           overwrite: true
 
       - name: Deploy to Vercel
-        run: vercel deploy --prod --token=$VERCEL_TOKEN
+        run: vercel deploy --prebuild --prod --token=$VERCEL_TOKEN
