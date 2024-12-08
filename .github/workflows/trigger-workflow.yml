@@ -14,7 +14,6 @@ on:
           - deploy-production.yml
 
 permissions:
-  contents: write       # Allows access to repo contents
   actions: write         # For dispatching workflows
 
 jobs:
@@ -22,7 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Call the Reusable Workflow
-        uses: ./.github/workflows/${{ github.event.inputs.workflow_name }}
+        uses: ./.github/workflows/${{ inputs.workflow_name }}
         with:
-          environment: ${{ github.event.inputs.environment }}
-          ref: ${{ github.event.inputs.ref }}
+          ref: ${{ github.ref }}
