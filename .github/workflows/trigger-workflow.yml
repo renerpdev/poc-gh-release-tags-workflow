@@ -13,6 +13,9 @@ on:
           - deploy-preview-development.yml
           - deploy-development.yml
 
+permissions:
+  contents: write       # Allows access to repo contents
+
 jobs:
   trigger-selected-workflow:
     runs-on: ubuntu-latest
