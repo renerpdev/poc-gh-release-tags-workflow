@@ -1,0 +1,40 @@
+name: Deploy Release to Production
+
+on:
+  release:
+    types:
+      - released
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  
+jobs:
+  Deploy-Production:
+    runs-on: ubuntu-latest
+    if: github.event.release.prerelease == 'false'
+    environment:
+      name: Production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: 'npm'
+
+      - run: npm install
+      - run: npm test
+      - run: npm run build
+
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
+        run: vercel deploy --prod --token=$VERCEL_TOKEN

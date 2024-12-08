@@ -1,0 +1,61 @@
+name: Deploy Pre-Release to Staging
+
+on:
+  release:
+    types:
+      - published  # Triggers when a pre-release or full release is published
+      - created    # Triggers when a draft release is created
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  
+jobs:
+  Deploy-Staging:
+    runs-on: ubuntu-latest
+    environment:
+      name: Staging
+    steps:
+      - name: Check Release Type
+        id: check-release
+        run: |
+          if [[ "${{ github.event.release.draft }}" == "true" ]]; then
+            echo "is_draft=true" >> $GITHUB_ENV
+            echo "Deployment type: Draft (Preview)"
+          elif [[ "${{ github.event.release.prerelease }}" == "true" ]]; then
+            echo "is_draft=false" >> $GITHUB_ENV
+            echo "Deployment type: Pre-release (Production)"
+          else
+            echo "Unknown release type. Skipping..."
+            exit 1
+          fi
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: 'npm'
+
+      - run: npm install
+      - run: npm test
+      - run: npm run build
+
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
+        run: |
+          if [[ "$is_draft" == "true" ]]; then
+            echo "Deploying a preview deployment..."
+            vercel deploy --token=$VERCEL_TOKEN
+          else
+            echo "Deploying a production deployment..."
+            vercel deploy --prod --token=$VERCEL_TOKEN
+          fi
