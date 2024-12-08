@@ -1,7 +1,6 @@
 name: Deploy to Development
 
 on:
-  workflow_call:
   pull_request:
     types:
       - closed
@@ -28,9 +27,12 @@ jobs:
           node-version-file: .nvmrc
           cache: 'npm'
 
-      - run: npm install
-      - run: npm run build
+      - name: Pull Vercel Environment
+        run: npx vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+
+      - name: Build Project Artifacts
+        run: npx vercel build --prod --token=$VERCEL_TOKEN
 
       - name: Deploy Project Artifacts to Vercel
-        run: npx vercel deploy --prod --token=$VERCEL_TOKEN
+        run: npx vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
 

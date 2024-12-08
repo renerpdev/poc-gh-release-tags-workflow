@@ -1,7 +1,6 @@
 name: Deploy Release to Production
 
 on:
-  workflow_call:
   release:
     types:
       - released
@@ -33,7 +32,12 @@ jobs:
 
       - run: npm install
       - run: npm test
-      - run: npm run build
+      
+      - name: Pull Vercel Environment
+        run: npx vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+
+      - name: Build Project Artifacts
+        run: npx vercel build --prod --token=$VERCEL_TOKEN
 
       - name: Deploy to Vercel
-        run: npx vercel deploy --prod --token=$VERCEL_TOKEN
+        run: npx vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN

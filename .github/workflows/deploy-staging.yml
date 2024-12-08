@@ -1,7 +1,6 @@
 name: Deploy Pre-Release to Staging
 
 on:
-  workflow_call:
   release:
     types:
       - published  # Triggers when a pre-release or full release is published
@@ -34,7 +33,12 @@ jobs:
 
       - run: npm install
       - run: npm test
-      - run: npm run build
+      
+      - name: Pull Vercel Environment
+        run: npx vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+
+      - name: Build Project Artifacts
+        run: npx vercel build --prod --token=$VERCEL_TOKEN
 
       - name: Deploy to Vercel
-        run: npx vercel deploy --prod --token=$VERCEL_TOKEN
+        run: npx vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
