@@ -18,25 +18,11 @@ env:
   
 jobs:
   Deploy-Staging:
-    if: github.event.release.prerelease == true
+    if: github.event.release.prerelease == true && github.event.release.draft == true
     runs-on: ubuntu-latest
     environment:
       name: Staging
     steps:
-      - name: Check Release Type
-        id: check-release
-        run: |
-          if [[ "${{ github.event.release.draft }}" == "true" ]]; then
-            echo "is_draft=true" >> $GITHUB_ENV
-            echo "Deployment type: Draft (Preview)"
-          elif [[ "${{ github.event.release.prerelease }}" == "true" ]]; then
-            echo "is_draft=false" >> $GITHUB_ENV
-            echo "Deployment type: Pre-release (Production)"
-          else
-            echo "Unknown release type. Skipping..."
-            exit 1
-          fi
-
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -52,6 +38,9 @@ jobs:
 
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+
+      - name: Make a Vercel Build
+        run: vercel build --prod --token=$VERCEL_TOKEN
 
       - uses: actions/upload-artifact@v4
         with:
