@@ -7,7 +7,7 @@ on:
       - published  # Triggers when a pre-release or full release is published
 
 concurrency:
-  group: prerelease-${{ github.workflow }}-${{ github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
 env:

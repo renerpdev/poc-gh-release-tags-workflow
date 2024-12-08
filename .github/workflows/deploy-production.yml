@@ -7,7 +7,7 @@ on:
       - released
 
 concurrency:
-  group: release-${{ github.workflow }}-${{ github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
 env:
