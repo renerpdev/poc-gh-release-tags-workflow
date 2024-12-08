@@ -9,15 +9,13 @@ on:
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PREVIEW_PROJECT_ID }}
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
 
 jobs:
   Preview-Development:
     runs-on: ubuntu-latest
-    environment:
-      name: Preview-Development
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -37,4 +35,25 @@ jobs:
         run: vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
         
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --token=$VERCEL_TOKEN
+      id: deploy
+      run: |
+        DEPLOY_URL=$(vercel deploy --token=$VERCEL_TOKEN --prod --scope=$VERCEL_TEAM)
+        echo "deployment_url=$DEPLOY_URL" >> $GITHUB_ENV
+        echo "Vercel Deployment URL: $DEPLOY_URL"
+
+      - name: Post Vercel Deployment URL to PR
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const deploymentUrl = process.env.deployment_url.trim();
+            const prNumber = context.payload.pull_request.number;
+            const commentBody = `✨ Preview available: [${deploymentUrl}](${deploymentUrl})`;
+
+            // Create a comment on the PR
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: commentBody
+            });
