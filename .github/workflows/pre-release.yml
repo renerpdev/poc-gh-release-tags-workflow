@@ -53,12 +53,11 @@ jobs:
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-build
+          path: .vercel/output
+          overwrite: true
+
       - name: Deploy to Vercel
-        run: |
-          if [[ "$is_draft" == "true" ]]; then
-            echo "Deploying a preview deployment..."
-            vercel deploy --token=$VERCEL_TOKEN
-          else
-            echo "Deploying a production deployment..."
-            vercel deploy --prod --token=$VERCEL_TOKEN
-          fi
+        run: vercel deploy --prod --token=$VERCEL_TOKEN

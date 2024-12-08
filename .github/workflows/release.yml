@@ -29,16 +29,15 @@ jobs:
           echo "assets-dir=release-assets" >> $GITHUB_ENV
 
       - name: Download release assets
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          repository: ${{ github.repository }}
-          tag: ${{ github.event.release.tag_name }}
-          destination: ${{ steps.output-assets.outputs.assets-dir }}
+          name: app-build
+          path: ${{ steps.output-assets.outputs.assets-dir }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: List downloaded assets
-        run: ls -la ${{ steps.output-assets.outputs.assets-dir }}
+        run: ls -R ${{ steps.output-assets.outputs.assets-dir }}
 
   Deploy-Production:
     needs: download-assets
