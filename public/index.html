@@ -3,11 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test</title>
+    <title>Form Submission Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        input, textarea {
+            padding: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #submissionMessage {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            color: #333;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <h1 style="color: #fdfdfd;">Hello World! </h1>
+    <h1>Contact Form</h1>
+    <form id="contactForm">
+        <input type="text" id="name" placeholder="Your Name" required>
+        <input type="email" id="email" placeholder="Your Email" required>
+        <textarea id="messageContent" placeholder="Your Message" required></textarea>
+        <button type="submit">Submit</button>
+    </form>
+    <div id="submissionMessage"></div>
 
-    <p>Lorem ipsum dolor epae issis tullum</p>
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const messageContent = document.getElementById('messageContent').value;
+            
+            const submissionMessageDiv = document.getElementById('submissionMessage');
+            submissionMessageDiv.innerHTML = `
+                <strong>Form Submitted:</strong><br>
+                Name: ${name}<br>
+                Email: ${email}<br>
+                Message: ${messageContent}
+            `;
+            submissionMessageDiv.style.display = 'block';
+            
+            // Clear the form
+            this.reset();
+        });
+    </script>
 </body>
 </html>
