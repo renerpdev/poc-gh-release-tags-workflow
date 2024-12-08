@@ -1,4 +1,4 @@
-name: Merge Pull Request
+name: Deploy to Development
 
 on:
   pull_request:
