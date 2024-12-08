@@ -13,6 +13,10 @@ env:
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
 
+permissions:
+  pull-requests: write # Allows posting comments to PRs
+  contents: write       # Allows access to repo contents
+
 jobs:
   Preview-Development:
     runs-on: ubuntu-latest
