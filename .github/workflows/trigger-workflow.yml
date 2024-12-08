@@ -17,23 +17,15 @@ jobs:
   Call-Preview-Development-Workflow:
     if: ${{ github.event.inputs.workflow_name == 'deploy-preview-development.yml' }}
     uses: ./.github/workflows/deploy-preview-development.yml
-    with:
-      ref: ${{ github.ref }}
 
   Call-Development-Workflow:
     if: ${{ github.event.inputs.workflow_name == 'deploy-development.yml' }}
     uses: ./.github/workflows/deploy-development.yml
-    with:
-      ref: ${{ github.ref }}
 
   Call-Staging-Workflow:
     if: ${{ github.event.inputs.workflow_name == 'deploy-staging.yml' }}
     uses: ./.github/workflows/deploy-staging.yml
-    with:
-      ref: ${{ github.ref }}
 
   Call-Production-Workflow:
     if: ${{ github.event.inputs.workflow_name == 'deploy-production.yml' }}
     uses: ./.github/workflows/deploy-production.yml
-    with:
-      ref: ${{ github.ref }}
