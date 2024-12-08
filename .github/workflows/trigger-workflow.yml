@@ -28,7 +28,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const workflowName = core.getInput('workflow_name');
-            const ref = github.ref;
+            const ref = github.ref_name;
 
             // Fetch all workflows in the repository to find the workflow ID
             const workflows = await github.rest.actions.listRepoWorkflows({
