@@ -19,49 +19,6 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   
 jobs:
-  Download-Assets:
-    runs-on: ubuntu-latest
-    outputs:
-      assets-dir: ${{ steps.output-assets.outputs.assets-dir }}
-    steps:
-      - name: Create a directory for assets
-        id: output-assets
-        run: |
-          mkdir -p release-assets
-          echo "assets-dir=release-assets" >> $GITHUB_ENV
-
-      - name: Fetch latest Pre-release run ID
-        id: fetch-run-id
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const workflow_id = 'pre-release.yml';
-            const { data: { workflow_runs } } = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: workflow_id,
-              status: 'success',
-              per_page: 1
-            });
-            if (workflow_runs.length > 0) {
-              console.log(`Latest Run ID: ${workflow_runs[0].id}`);
-              core.setOutput('latest_run_id', workflow_runs[0].id);
-            } else {
-              console.log('No runs found for the specified workflow.');
-            }
-
-      - name: Download release assets
-        uses: actions/download-artifact@v4
-        with:
-          name: app-build
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ steps.fetch-run-id.outputs.latest_run_id }};
-          path: ${{ steps.output-assets.outputs.assets-dir }}
-
-      - name: List downloaded assets
-        run: ls -R ${{ steps.output-assets.outputs.assets-dir }}
-
   Deploy-Production:
     needs: download-assets
     runs-on: ubuntu-latest
@@ -77,10 +34,8 @@ jobs:
           node-version-file: .nvmrc
           cache: 'npm'
 
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+      - run: npm install
+      - run: npm run build
 
       - name: Deploy to Vercel
-        run: |
-          echo "Deploying with assets from pre-release..."
-          vercel deploy --prod --token=$VERCEL_TOKEN --files=$GITHUB_WORKSPACE/$assets-dir
+        run: vercel deploy --prod --token=$VERCEL_TOKEN
