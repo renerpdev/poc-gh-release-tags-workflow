@@ -1,7 +1,7 @@
 name: Deploy Pre-Release to Staging
 
 on:
-  workflow_dispatch:
+  workflow_call:
   release:
     types:
       - published  # Triggers when a pre-release or full release is published

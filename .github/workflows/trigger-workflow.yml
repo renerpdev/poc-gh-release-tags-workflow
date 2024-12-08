@@ -18,37 +18,11 @@ permissions:
   actions: write         # For dispatching workflows
 
 jobs:
-  trigger-selected-workflow:
+  Call-Reusable-Workflow:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Trigger Selected Workflow
-        uses: actions/github-script@v6
+      - name: Call the Reusable Workflow
+        uses: ./.github/workflows/${{ github.event.inputs.workflow_name }}
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const workflowName = core.getInput('workflow_name');
-            const ref = context.ref;
-
-            // Fetch all workflows in the repository to find the workflow ID
-            const workflows = await github.rest.actions.listRepoWorkflows({
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            });
-
-            // Find the workflow matching the selected name
-            const workflow = workflows.data.workflows.find(w => w.path.endsWith(workflowName));
-
-            if (!workflow) {
-              throw new Error(`Workflow "${workflowName}" not found in repository.`);
-            }
-
-            // Trigger the workflow_dispatch event for the selected workflow
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: workflow.id,
-              ref: ref
-            });
-
-            console.log(`Successfully triggered workflow "${workflowName}" with ref "${ref}".`);
+          environment: ${{ github.event.inputs.environment }}
+          ref: ${{ github.event.inputs.ref }}
