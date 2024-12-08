@@ -4,7 +4,6 @@ on:
   release:
     types:
       - published  # Triggers when a pre-release or full release is published
-      - created    # Triggers when a draft release is created
 
 concurrency:
   group: prerelease-${{ github.workflow }}-${{ github.ref_name }}
@@ -18,7 +17,7 @@ env:
   
 jobs:
   Deploy-Staging:
-    if: github.event.release.prerelease == true && github.event.release.draft == true
+    if: github.event.release.prerelease == true
     runs-on: ubuntu-latest
     environment:
       name: Staging
