@@ -41,7 +41,7 @@ jobs:
       - name: Deploy Project Artifacts to Vercel
         id: deploy
         run: |
-          DEPLOY_URL=$(vercel deploy --token=$VERCEL_TOKEN --prod)
+          DEPLOY_URL=$(vercel deploy --token=$VERCEL_TOKEN)
           echo "deployment_url=$DEPLOY_URL" >> $GITHUB_ENV
           echo "Vercel Deployment URL: $DEPLOY_URL"
 
