@@ -16,8 +16,28 @@ on:
 jobs:
   Call-Reusable-Workflow:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Call the Reusable Workflow
-        uses: ./.github/workflows/${{ github.event.inputs.workflow_name }}
+      - name: Call Preview Development Workflow
+        if: ${{ github.event.inputs.workflow_name == 'deploy-preview-development.yml' }}
+        uses: ./.github/workflows/deploy-preview-development.yml
         with:
-          ref: ${{ github.event.inputs.ref }}
+          ref: ${{ github.ref }}
+
+      - name: Call Development Workflow
+        if: ${{ github.event.inputs.workflow_name == 'deploy-development.yml' }}
+        uses: ./.github/workflows/deploy-development.yml
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Call Staging Workflow
+        if: ${{ github.event.inputs.workflow_name == 'deploy-staging.yml' }}
+        uses: ./.github/workflows/deploy-staging.yml
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Call Production Workflow
+        if: ${{ github.event.inputs.workflow_name == 'deploy-production.yml' }}
+        uses: ./.github/workflows/deploy-production.yml
+        with:
+          ref: ${{ github.ref }}
