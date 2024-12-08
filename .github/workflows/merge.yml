@@ -1,9 +1,9 @@
 name: Merge Pull Request
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    types:
+      - closed
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -13,6 +13,7 @@ env:
 
 jobs:
   Deployment:
+    if: github.event.pull_request.merged == true # Ensure the job only runs if the PR is merged
     runs-on: ubuntu-latest
     environment:
       name: Development
@@ -26,18 +27,12 @@ jobs:
           node-version-file: .nvmrc
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run build
-        run: npm run build
+      - run: npm install
+      - run: npm run build
 
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
 
-      - name: Build Project Artifacts
-        run: vercel build --prod --token=$VERCEL_TOKEN
-        
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prod --prebuilt --token=$VERCEL_TOKEN
+        run: vercel deploy --prod --token=$VERCEL_TOKEN
 
