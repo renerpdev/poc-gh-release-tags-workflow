@@ -31,7 +31,8 @@ jobs:
           cache: 'npm'
 
       - run: npm install
+      - run: npm test
       - run: npm run build
 
       - name: Deploy to Vercel
-        run: vercel deploy --prod --token=$VERCEL_TOKEN
+        run: npx vercel deploy --prod --token=$VERCEL_TOKEN
