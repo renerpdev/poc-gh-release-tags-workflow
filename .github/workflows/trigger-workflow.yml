@@ -13,6 +13,10 @@ on:
           - deploy-staging.yml
           - deploy-production.yml
 
+permissions:
+  pull-requests: write # Allows posting comments to PRs
+  contents: write       # Allows access to repo contents
+  
 jobs:
   Call-Preview-Development-Workflow:
     if: ${{ github.event.inputs.workflow_name == 'deploy-preview-development.yml' }}
