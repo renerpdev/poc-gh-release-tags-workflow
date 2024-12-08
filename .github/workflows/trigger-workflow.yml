@@ -13,14 +13,11 @@ on:
           - deploy-staging.yml
           - deploy-production.yml
 
-permissions:
-  actions: write         # For dispatching workflows
-
 jobs:
   Call-Reusable-Workflow:
     runs-on: ubuntu-latest
     steps:
       - name: Call the Reusable Workflow
-        uses: ./.github/workflows/${{ inputs.workflow_name }}
+        uses: ./.github/workflows/${{ github.event.inputs.workflow_name }}
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ github.event.inputs.ref }}
