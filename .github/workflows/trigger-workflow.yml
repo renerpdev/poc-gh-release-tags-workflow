@@ -8,13 +8,14 @@ on:
         required: true
         type: choice
         options:
-          - deploy-staging.yml
-          - deploy-production.yml
           - deploy-preview-development.yml
           - deploy-development.yml
+          - deploy-staging.yml
+          - deploy-production.yml
 
 permissions:
   contents: write       # Allows access to repo contents
+  actions: write         # For dispatching workflows
 
 jobs:
   trigger-selected-workflow:
