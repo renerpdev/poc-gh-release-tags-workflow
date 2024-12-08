@@ -7,11 +7,13 @@ on:
       - created    # Triggers when a draft release is created
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_name }}
+  group: prerelease-${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   
 jobs:
@@ -51,9 +53,6 @@ jobs:
         run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
 
       - name: Deploy to Vercel
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
         run: |
           if [[ "$is_draft" == "true" ]]; then
             echo "Deploying a preview deployment..."
