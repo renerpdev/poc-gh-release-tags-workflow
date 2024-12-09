@@ -16,7 +16,7 @@ on:
         required: true
         type: boolean
         default: true
-        
+
 permissions:
   contents: write
 
@@ -94,16 +94,18 @@ jobs:
             changelog=$(git log --pretty=format:"- %h %s" --no-merges)
           else
             echo "Generating changelog from the latest tag to current ref."
-            changelog=$(git log ${{ env.latest_tag }}..${{ github.ref_name }} --pretty=format:"- %h %s" --no-merges)
+            changelog=$(git log "${{ env.latest_tag }}".."${{ github.ref_name }}" --pretty=format:"- %h %s" --no-merges)
           fi
 
-          # Escape special characters in the changelog to make it valid for JSON
-          changelog=$(echo "$changelog" | sed 's/"/\\"/g' | sed "s/'/\\'/g")
+          # Escape special characters in the changelog for JSON
+          changelog=$(echo "$changelog" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g' | sed "s/'/\\'/g")
 
           # Format the release body
-          body="## Changes in ${{ env.next_tag }}\n\n$changelog"
+          body="## Changes in ${{ env.next_tag }}\\n\\n$changelog"
           echo "Generated release body:"
           echo "$body"
+
+          # Write the sanitized release body to $GITHUB_ENV
           echo "release_body=$body" >> $GITHUB_ENV
 
       - name: Create Release
