@@ -4,6 +4,7 @@ on:
   release:
     types:
       - published  # Triggers when a pre-release or full release is published
+      - created
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}

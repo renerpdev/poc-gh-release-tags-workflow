@@ -4,6 +4,7 @@ on:
   release:
     types:
       - released
+      - created
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -17,6 +18,7 @@ env:
   
 jobs:
   Deploy-Production:
+    if: github.event.release.prerelease == false && github.event.release.draft == false
     runs-on: ubuntu-latest
     environment:
       name: Production
