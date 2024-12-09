@@ -93,8 +93,8 @@ jobs:
             echo "No previous tags found. Generating changelog for all commits."
             changelog=$(git log --pretty=format:"- %h %s" --no-merges)
           else
-            echo "Generating changelog from $LATEST_TAG to HEAD."
-            changelog=$(git log ${LATEST_TAG}..HEAD --pretty=format:"- %h %s" --no-merges)
+            echo "Generating changelog from the latest tag to current ref."
+            changelog=$(git log ${{ env.latest_tag }}..${{ github.ref_name }} --pretty=format:"- %h %s" --no-merges)
           fi
 
           # Escape special characters in the changelog to make it valid for JSON
