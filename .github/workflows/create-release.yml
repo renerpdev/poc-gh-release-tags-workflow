@@ -88,14 +88,17 @@ jobs:
       - name: Generate Release Body
         id: generate-release-body
         run: |
-          # Verify if there are any tags
+          # Check if this is the first release (no previous tags)
           if [ "${{ env.latest_tag }}" = "v0.0.0" ]; then
             echo "No previous tags found. Generating changelog for all commits."
-            changelog=$(git log --oneline)
+            changelog=$(git log --pretty=format:"- %h %s" --no-merges)
           else
-            echo "Generating changelog from ${LATEST_TAG} to HEAD."
-            changelog=$(git log $LATEST_TAG..HEAD --oneline)
+            echo "Generating changelog from $LATEST_TAG to HEAD."
+            changelog=$(git log ${LATEST_TAG}..HEAD --pretty=format:"- %h %s" --no-merges)
           fi
+
+          # Escape special characters in the changelog to make it valid for JSON
+          changelog=$(echo "$changelog" | sed 's/"/\\"/g' | sed "s/'/\\'/g")
 
           # Format the release body
           body="## Changes in ${{ env.next_tag }}\n\n$changelog"
