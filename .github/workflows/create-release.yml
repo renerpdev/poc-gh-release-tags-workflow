@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_type:
-        description: "Select the type of release (patch, minor, major)"
+        description: "Select the release type"
         required: true
         type: choice
         options:
@@ -12,7 +12,7 @@ on:
           - minor
           - major
       is_prerelease:
-        description: "Check to create a pre-release"
+        description: "Create a pre-release"
         required: true
         type: boolean
         default: true
@@ -34,10 +34,16 @@ jobs:
       - name: Get latest tag
         id: get-latest-tag
         run: |
-          # Get the latest tag
-          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "v0.0.0")
-          echo "Latest tag: $latest_tag"
-          echo "latest_tag=$latest_tag" >> $GITHUB_ENV
+          # Verify if there are any tags in the repository
+          if [ "$(git tag)" = "" ]; then
+            echo "No tags found. Defaulting to v0.0.0"
+            echo "latest_tag=v0.0.0" >> $GITHUB_ENV
+          else
+            # Get the latest tag based on chronological order
+            latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+            echo "Latest tag: $latest_tag"
+            echo "latest_tag=$latest_tag" >> $GITHUB_ENV
+          fi
 
       - name: Calculate next tag
         id: calculate-next-tag
@@ -82,14 +88,16 @@ jobs:
       - name: Generate Release Body
         id: generate-release-body
         run: |
-          # Generate the list of commits between the latest tag and HEAD
+          # Verify if there are any tags
           if [ "${{ env.latest_tag }}" = "v0.0.0" ]; then
+            echo "No previous tags found. Generating changelog for all commits."
             changelog=$(git log --oneline)
           else
-            changelog=$(git log ${GITHUB_ENV:?"latest_tag"}..HEAD --oneline)
+            echo "Generating changelog from ${LATEST_TAG} to HEAD."
+            changelog=$(git log $LATEST_TAG..HEAD --oneline)
           fi
 
-          # Format the body of the release
+          # Format the release body
           body="## Changes in ${{ env.next_tag }}\n\n$changelog"
           echo "Generated release body:"
           echo "$body"
