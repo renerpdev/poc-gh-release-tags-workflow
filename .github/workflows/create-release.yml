@@ -16,6 +16,11 @@ on:
         required: true
         type: boolean
         default: true
+      is_draft:
+        description: "Mark as a draft"
+        required: true
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -126,7 +131,7 @@ jobs:
             "target_commitish": "main",
             "name": "Release ${{ env.next_tag }}",
             "body": "${{ env.release_body }}",
-            "draft": false,
+            "draft": "${{ github.event.inputs.is_draft }}",
             "prerelease": $prerelease
           }
           EOF
