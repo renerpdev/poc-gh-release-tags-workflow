@@ -35,8 +35,12 @@ jobs:
       - name: Calculate next tag
         id: calculate-next-tag
         run: |
-          # Extract components of the SemVer tag
-          IFS='.' read -ra PARTS <<< "${{ env.latest_tag#v }}"
+          # Extract the latest tag, stripping the 'v' prefix if it exists
+          latest_tag="${{ env.latest_tag }}"
+          latest_version="${latest_tag#v}" # Strips 'v' if present
+
+          # Split the version into major, minor, and patch components
+          IFS='.' read -ra PARTS <<< "$latest_version"
           major=${PARTS[0]:-0}
           minor=${PARTS[1]:-0}
           patch=${PARTS[2]:-0}
