@@ -3,7 +3,7 @@ name: Deploy Release to Production
 on:
   release:
     types:
-      - released
+      - published  # Triggers when a pre-release or full release is published
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
