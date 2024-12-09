@@ -4,7 +4,6 @@ on:
   release:
     types:
       - released
-      - created
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
