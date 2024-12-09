@@ -118,7 +118,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Define if the release is a pre-release
-          prerelease=${{ github.event.inputs.is_prerelease }}
+          is_prerelease=${{ github.event.inputs.is_prerelease }}
+          is_draft=${{ github.event.inputs.is_draft }}
 
           # Create the release using the GitHub API
           curl -X POST \
@@ -131,8 +132,8 @@ jobs:
             "target_commitish": "main",
             "name": "Release ${{ env.next_tag }}",
             "body": "${{ env.release_body }}",
-            "draft": "${{ github.event.inputs.is_draft }}",
-            "prerelease": $prerelease
+            "draft": $is_draft,
+            "prerelease": $is_prerelease
           }
           EOF
 
