@@ -15,6 +15,10 @@ on:
         description: "Check to create a pre-release"
         required: true
         type: boolean
+        default: true
+        
+permissions:
+  contents: write
 
 jobs:
   create-release:
