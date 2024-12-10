@@ -41,6 +41,24 @@ jobs:
 
       - run: npm install
       - run: npm test
+
+      - name: Set Vercel Project ID
+        run: |
+          case "${{ github.event.inputs.environment }}" in
+            Development)
+              echo "VERCEL_PROJECT_ID=${{ secrets.VERCEL_DEV_PROJECT_ID }}" >> $GITHUB_ENV
+              ;;
+            Staging)
+              echo "VERCEL_PROJECT_ID=${{ secrets.VERCEL_STAGING_PROJECT_ID }}" >> $GITHUB_ENV
+              ;;
+            Production)
+              echo "VERCEL_PROJECT_ID=${{ secrets.VERCEL_PROD_PROJECT_ID }}" >> $GITHUB_ENV
+              ;;
+            *)
+              echo "Unknown environment: ${{ github.event.inputs.environment }}"
+              exit 1
+              ;;
+          esac
       
       - name: Pull Vercel Environment (Preview)
         if: github.event.inputs.is_preview == 'true'
