@@ -1,0 +1,68 @@
+name: Create Vercel Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Select the environment"
+        required: true
+        type: choice
+        options:
+          - Development
+          - Staging
+          - Production
+      is_preview:
+        description: "Create a preview"
+        required: true
+        type: boolean
+        default: true
+  
+jobs:
+  Create-Deployment:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
+      VERCEL_PROJECT_ID: ${{ secrets.PROJECT_ID }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Downloads also the tags
+          ref: ${{ github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: 'npm'
+
+      - run: npm install
+      - run: npm test
+      
+      - name: Pull Vercel Environment (Preview)
+        if: github.event.inputs.is_preview == true
+        run: npx vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+        
+      - name: Pull Vercel Environment (Production)
+        if: github.event.inputs.is_preview == false
+        run: npx vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+
+      - name: Build Project Artifacts (Preview)
+        if: github.event.inputs.is_preview == true
+        run: npx vercel build --token=$VERCEL_TOKEN
+
+      - name: Build Project Artifacts (Production)
+        if: github.event.inputs.is_preview == false
+        run: npx vercel build --prod --token=$VERCEL_TOKEN
+
+      - name: Deploy to Vercel (Preview)
+        if: github.event.inputs.is_preview == true
+        run: npx vercel deploy --prebuilt --token=$VERCEL_TOKEN
+
+      - name: Deploy to Vercel (Production)
+        if: github.event.inputs.is_preview == false
+        run: npx vercel deploy --prod --prebuilt --token=$VERCEL_TOKEN
