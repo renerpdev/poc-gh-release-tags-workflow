@@ -1,9 +1,9 @@
 name: Deploy Release to Production
 
 on:
-  release:
+  repository_dispatch:
     types:
-      - published  # Triggers when a pre-release or full release is published
+      - release_created
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -17,13 +17,14 @@ env:
   
 jobs:
   Deploy-Production:
-    if: github.event.release.prerelease == false && github.event.release.draft == false
     runs-on: ubuntu-latest
     environment:
       name: Production
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.client_payload.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v3

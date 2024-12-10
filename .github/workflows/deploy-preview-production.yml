@@ -1,13 +1,9 @@
 name: Deploy Draft Release to Preview-Production
 
 on:
-  release:
+  repository_dispatch:
     types:
-      - created
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_name }}
-  cancel-in-progress: true
+      - draft_release_created
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -17,11 +13,12 @@ env:
   
 jobs:
   Deploy-Preview-Production:
-    if: github.event.release.prerelease == false && github.event.release.draft == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.client_payload.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
