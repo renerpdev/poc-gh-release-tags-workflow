@@ -16,7 +16,11 @@ on:
         required: true
         type: boolean
         default: true
-  
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.inputs.environment }}-${{ github.event.inputs.is_preview == 'false' && 'preview' || '_' }}
+  cancel-in-progress: false
+
 jobs:
   Create-Deployment:
     runs-on: ubuntu-latest
