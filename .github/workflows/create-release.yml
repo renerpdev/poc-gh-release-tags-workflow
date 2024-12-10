@@ -130,7 +130,7 @@ jobs:
             -d @- << EOF
           {
             "tag_name": "${{ env.next_tag }}",
-            "target_commitish": "main",
+            "target_commitish": "${{ github.sha }}",
             "name": "Release ${{ env.next_tag }}",
             "body": "${{ env.release_body }}",
             "draft": $is_draft,
@@ -183,7 +183,7 @@ jobs:
           {
             "event_type": "$event_type",
             "client_payload": {
-              "ref": "${{ github.ref }}"
+              "ref": "${{ env.next_tag }}"
             }
           }
           EOF
