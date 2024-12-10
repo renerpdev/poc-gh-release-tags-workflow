@@ -2,7 +2,8 @@ name: Deploy Release to Production
 
 on:
   release:
-    - published
+    types:
+      - published
   repository_dispatch:
     types:
       - release_created
