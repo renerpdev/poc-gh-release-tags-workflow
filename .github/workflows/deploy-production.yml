@@ -18,8 +18,7 @@ env:
 jobs:
   Deploy-Production:
     runs-on: ubuntu-latest
-    environment:
-      name: Production
+    environment: ${{ github.event.client_payload.environment }} # Dynamically set environment
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

@@ -163,12 +163,14 @@ jobs:
               event_type="draft_prerelease_created"
             else
               event_type="prerelease_created"
+              environment="Staging"
             fi
           else
             if [ "${{ github.event.inputs.is_draft }}" = "true" ]; then
               event_type="draft_release_created"
             else
               event_type="release_created"
+              environment="Production"
             fi
           fi
 
@@ -184,6 +186,7 @@ jobs:
             "event_type": "$event_type",
             "client_payload": {
               "ref": "${{ env.next_tag }}"
+              "environment": "$environment",
             }
           }
           EOF
