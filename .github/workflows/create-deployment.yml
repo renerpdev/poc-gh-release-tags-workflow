@@ -18,7 +18,7 @@ on:
         default: true
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.inputs.environment }}-${{ github.event.inputs.is_preview == 'true' && 'preview' || '_' }}
+  group: ${{ github.workflow }}-${{ github.event.inputs.environment }}-${{ github.event.inputs.is_preview == 'true' && 'preview' || 'no_preview' }}
   cancel-in-progress: false
 
 jobs:
