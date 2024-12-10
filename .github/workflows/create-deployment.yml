@@ -20,8 +20,7 @@ on:
 jobs:
   Create-Deployment:
     runs-on: ubuntu-latest
-    environment:
-      name: ${{ github.event.inputs.environment }}
+    environment: ${{ github.event.inputs.is_preview == 'false' && github.event.inputs.environment || null }}
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
