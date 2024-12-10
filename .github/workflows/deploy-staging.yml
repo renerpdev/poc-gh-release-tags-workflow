@@ -3,7 +3,7 @@ name: Deploy Pre-Release to Staging
 on:
   release:
     types:
-      - published
+      - prereleased
   repository_dispatch:
     types:
       - prerelease_created
