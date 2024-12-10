@@ -1,6 +1,8 @@
 name: Deploy Release to Production
 
 on:
+  release:
+    - published
   repository_dispatch:
     types:
       - release_created
@@ -8,23 +10,24 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
-
-env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-  VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   
 jobs:
   Deploy-Production:
+    if: github.event.release.prerelease == false && github.event.release.draft == false
     runs-on: ubuntu-latest
-    environment: ${{ github.event.client_payload.environment }} # Dynamically set environment
+    environment:
+      name: Production
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROD_PROJECT_ID }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Downloads also the tags
-          ref: ${{ github.event.client_payload.ref }}
+          ref: ${{ github.event.release.tag_name || github.event.client_payload.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v3

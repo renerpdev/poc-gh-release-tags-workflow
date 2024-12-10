@@ -7,18 +7,17 @@ on:
       - synchronize
       - reopened
 
-env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PREVIEW_PROJECT_ID }}
-  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-  VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
-
 permissions:
   pull-requests: write # Allows posting comments to PRs
   contents: write       # Allows access to repo contents
 
 jobs:
   Preview-Development:
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_DEV_PROJECT_ID }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
