@@ -5,10 +5,6 @@ on:
     types:
       - closed
 
-permissions:
-  contents: write
-  actions: write       # Allows access to trigger actions
-  
 jobs:
   Deploy-Development:
     if: github.event.pull_request.merged == true # Ensure the job only runs if the PR is merged

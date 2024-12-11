@@ -9,10 +9,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
-permissions:
-  contents: write
-  actions: write  
-
 jobs:
   Deploy-Staging:
     if: (github.event.release.prerelease == true && github.event.release.draft == false) || github.event_name == 'repository_dispatch'

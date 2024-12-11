@@ -7,10 +7,6 @@ on:
       - synchronize
       - reopened
 
-permissions:
-  pull-requests: write # Allows posting comments to PRs
-  contents: write       # Allows access to repo contents
-
 jobs:
   Preview-Development:
     env:
