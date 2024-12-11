@@ -1,4 +1,4 @@
-name: Create Vercel Deployment (${{ github.event.inputs.environment }}) (${{ github.event.inputs.is_preview == 'true' && '(Preview)' || '' }})
+name: Create Vercel Deployment
 
 on:
   workflow_dispatch:

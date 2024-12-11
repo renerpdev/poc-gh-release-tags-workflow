@@ -5,6 +5,10 @@ on:
     types:
       - closed
 
+permissions:
+  contents: write
+  actions: write       # Allows access to trigger actions
+  
 jobs:
   Deploy-Development:
     env:
@@ -17,21 +21,32 @@ jobs:
     environment:
       name: Development
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Trigger Release Event
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          response=$(curl -s -o response.json -w "%{http_code}" \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/create-deployment.yml/dispatches \
+            -d @- << EOF
+          {
+            "ref": "${{ github.ref }}",
+            "inputs": {
+              "environment": "Development", 
+              "is_preview": "false" 
+            }
+          }
+          EOF
+          )
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: .nvmrc
-          cache: 'npm'
-
-      - name: Pull Vercel Environment
-        run: npx vercel pull --yes --environment=production --token=$VERCEL_TOKEN
-
-      - name: Build Project Artifacts
-        run: npx vercel build --prod --token=$VERCEL_TOKEN
-
-      - name: Deploy Project Artifacts to Vercel
-        run: npx vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
+          if [ "$response" -ne 204 ]; then
+            echo "Failed to dispatch release event. HTTP response code: $response"
+            echo "Response body:"
+            cat response.json
+            exit 1
+          else
+            echo "Release event dispatched successfully!"
+          fi
 
