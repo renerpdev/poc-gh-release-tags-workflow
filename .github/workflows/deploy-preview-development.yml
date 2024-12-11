@@ -49,7 +49,7 @@ jobs:
       - name: Post Vercel Deployment URL to PR
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PAT }}
           script: |
             const deploymentUrl = process.env.deployment_url.trim();
             const prNumber = context.payload.pull_request.number;
