@@ -1,4 +1,4 @@
-name: Create Vercel Deployment
+name: Create Vercel Deployment (${{ github.event.inputs.environment }}) (${{ github.event.inputs.is_preview == 'true' && '(Preview)' || '' }})
 
 on:
   workflow_dispatch:
@@ -19,7 +19,7 @@ on:
         default: false
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.inputs.environment }} ${{ github.event.inputs.is_preview == 'true' && '(Preview)' || '(No Preview)' }}
+  group: ${{ github.workflow }}-${{ github.event.inputs.environment }} ${{ github.event.inputs.is_preview == 'true' && '(Preview)' || '' }}
   cancel-in-progress: false
 
 jobs:
