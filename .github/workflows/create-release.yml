@@ -104,7 +104,7 @@ jobs:
           fi
 
           # Generate the full changelog link
-          changelog_link="https://github.com/${{ github.repository }}/compare/${{ env.latest_tag }}...${{ env.ref_name }}"
+          changelog_link="https://github.com/${{ github.repository }}/compare/${{ env.latest_tag }}...${{ github.ref_name }}"
 
           # Escape special characters in the changelog for JSON
           changelog=$(echo -e "$changelog\n\n$changelog_link" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g' | sed "s/'/\\'/g")
