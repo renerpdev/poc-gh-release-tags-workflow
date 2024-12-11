@@ -7,14 +7,22 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
             padding: 20px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            overflow-y: hidden;
         }
         form {
             display: flex;
             flex-direction: column;
             gap: 10px;
+            width: 100%;
+            max-width: 400px;
         }
         input, textarea {
             padding: 5px;
@@ -22,7 +30,7 @@
         }
         button {
             padding: 10px;
-            background-color: #4CAF50;
+            background-color: #2029a1;
             color: white;
             border: none;
             cursor: pointer;
@@ -34,15 +42,19 @@
             color: #333;
             border-radius: 5px;
             display: none;
+            border: 1px solid #333;
+        }
+        #colorBox{
+            transition: background-color ease-in-out 1s;
         }
     </style>
 </head>
-<body>
+<body id="colorBox">
     <h1>Contact Form</h1>
     <form id="contactForm">
-        <input type="text" id="name" placeholder="Your Name" required>
-        <input type="email" id="email" placeholder="Your Email" required>
-        <textarea id="messageContent" placeholder="Your Message" required></textarea>
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <textarea id="messageContent" placeholder="Message" required></textarea>
         <button type="submit">Submit</button>
     </form>
     <div id="submissionMessage"></div>
@@ -68,5 +80,22 @@
             this.reset();
         });
     </script>
+     <script>
+        const colorBox = document.getElementById('colorBox');
+    
+        // Genera un color aleatorio en formato hexadecimal
+        function getRandomColor() {
+          return `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+        }
+    
+        // Cambia el fondo del div a un color aleatorio
+        function changeBackgroundColor() {
+          const newColor = getRandomColor();
+          colorBox.style.backgroundColor = newColor;
+        }
+    
+        // Cambia el color cada 5 segundos (5000ms)
+        setInterval(changeBackgroundColor, 5000);
+      </script>
 </body>
 </html>
