@@ -103,11 +103,16 @@ jobs:
             changelog=$(git log "${{ env.latest_tag }}".."${{ github.ref_name }}" --pretty=format:"- %h %s" --no-merges)
           fi
 
+          is_draft=${{ github.event.inputs.is_draft }}
           # Generate the full changelog link
-          changelog_link="https://github.com/${{ github.repository }}/compare/${{ env.latest_tag }}...${{ github.ref_name }}"
+          if [ "$is_draft" == "false" ]; then
+            changelog_link="https://github.com/${{ github.repository }}/compare/${{ env.latest_tag }}...${{ env.next_tag }}"
+          else
+            changelog_link="https://github.com/${{ github.repository }}/compare/${{ env.latest_tag }}...${{ github.ref_name }}"
+          fi
 
           # Escape special characters in the changelog for JSON
-          changelog=$(echo -e "$changelog\n\n$changelog_link" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g' | sed "s/'/\\'/g")
+          changelog=$(echo -e "$changelog\n\nFull Changelog: $changelog_link" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g' | sed "s/'/\\'/g")
 
           # Format the release body
           body="## Changes in ${{ env.next_tag }}\\n\\n$changelog"
