@@ -104,12 +104,14 @@ jobs:
           fi
 
           is_draft=${{ github.event.inputs.is_draft }}
-          # Generate the full changelog link
           if [ "$is_draft" == "false" ]; then
-            changelog_link="https://github.com/${{ github.repository }}/compare/${{ env.latest_tag }}...${{ env.next_tag }}"
+            head_ref=${{ env.next_tag }}
           else
-            changelog_link="https://github.com/${{ github.repository }}/compare/${{ env.latest_tag }}...${{ github.ref_name }}"
+            head_ref=${{ github.ref_name }}
           fi
+
+          # Generate the full changelog link
+          changelog_link="https://github.com/${{ github.repository }}/compare/${{ env.latest_tag }}...$head_ref"
 
           # Escape special characters in the changelog for JSON
           changelog=$(echo -e "$changelog\n\nFull Changelog: $changelog_link" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g' | sed "s/'/\\'/g")
@@ -184,33 +186,26 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Determine the event type based on whether it's a pre-release or a release or draft
-          if [ "${{ github.event.inputs.is_prerelease }}" = "true" ]; then
-            if [ "${{ github.event.inputs.is_draft }}" = "true" ]; then
-              event_type="draft_prerelease_created"
-            else
-              event_type="prerelease_created"
-            fi
+          if [ "${{ github.event.inputs.is_prerelease }}" == "true" ]; then
+            environment="staging"
+          elif [ "${{ github.event.inputs.is_prerelease }}" == "false" ]; then
+            environment="production"
           else
-            if [ "${{ github.event.inputs.is_draft }}" = "true" ]; then
-              event_type="draft_release_created"
-            else
-              event_type="release_created"
-            fi
+            echo "Error: Invalid value for is_prerelease input"
+            exit 1
           fi
-
-          echo "Triggering repository_dispatch event: $event_type"
 
           response=$(curl -s -o response.json -w "%{http_code}" \
             -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer $GITHUB_TOKEN" \
-            https://api.github.com/repos/${{ github.repository }}/dispatches \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/create-deployment.yml/dispatches \
             -d @- << EOF
           {
-            "event_type": "$event_type",
-            "client_payload": {
-              "ref": "${{ env.next_tag }}"
+            "ref": "${{ github.ref }}",
+            "inputs": {
+              "environment": "$environment", 
+              "is_preview": "${{ github.event.inputs.is_draft }}" 
             }
           }
           EOF
