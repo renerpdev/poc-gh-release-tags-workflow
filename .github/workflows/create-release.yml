@@ -8,10 +8,10 @@ on:
         required: true
         type: choice
         options:
-          - patch
-          - minor
-          - major
-        default: minor
+          - Patch
+          - Minor
+          - Major
+        default: Minor
       is_prerelease:
         description: "Create a pre-release"
         required: true
@@ -67,14 +67,14 @@ jobs:
           # Determine release type
           release_type="${{ github.event.inputs.release_type }}"
           case $release_type in
-            patch)
+            Patch)
               patch=$((patch + 1))
               ;;
-            minor)
+            Minor)
               minor=$((minor + 1))
               patch=0
               ;;
-            major)
+            Major)
               major=$((major + 1))
               minor=0
               patch=0
@@ -128,13 +128,13 @@ jobs:
 
           # Dynamically set the release name based on the release type
           case "$release_type" in
-            patch)
+            Patch)
               release_name="Patch Release ${{ env.next_tag }}"
               ;;
-            minor)
+            Minor)
               release_name="Minor Release ${{ env.next_tag }}"
               ;;
-            major)
+            Major)
               release_name="Major Release ${{ env.next_tag }}"
               ;;
             *)
