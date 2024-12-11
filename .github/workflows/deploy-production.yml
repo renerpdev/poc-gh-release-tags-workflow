@@ -16,27 +16,31 @@ jobs:
     environment:
       name: Production
     steps:
-      response=$(curl -s -o response.json -w "%{http_code}" \
-        -X POST \
-        -H "Accept: application/vnd.github+json" \
-        -H "Authorization: Bearer $GITHUB_TOKEN" \
-        https://api.github.com/repos/${{ github.repository }}/actions/workflows/create-deployment.yml/dispatches \
-        -d @- << EOF
-      {
-        "ref": "${{ github.ref }}",
-        "inputs": {
-          "environment": "Production", 
-          "is_preview": "false" 
-        }
-      }
-      EOF
-      )
+      - name: Trigger Release Event
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          response=$(curl -s -o response.json -w "%{http_code}" \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/create-deployment.yml/dispatches \
+            -d @- << EOF
+          {
+            "ref": "${{ github.ref }}",
+            "inputs": {
+              "environment": "Production", 
+              "is_preview": "false" 
+            }
+          }
+          EOF
+          )
 
-      if [ "$response" -ne 204 ]; then
-        echo "Failed to dispatch release event. HTTP response code: $response"
-        echo "Response body:"
-        cat response.json
-        exit 1
-      else
-        echo "Release event dispatched successfully!"
-      fi
+          if [ "$response" -ne 204 ]; then
+            echo "Failed to dispatch release event. HTTP response code: $response"
+            echo "Response body:"
+            cat response.json
+            exit 1
+          else
+            echo "Release event dispatched successfully!"
+          fi
