@@ -102,8 +102,11 @@ jobs:
             changelog=$(git log "${{ env.latest_tag }}".."${{ github.ref_name }}" --pretty=format:"- %h %s" --no-merges)
           fi
 
+          # Generate the full changelog link
+          changelog_link="https://github.com/${{ github.repository }}/compare/${{ env.previous_tag }}...${{ env.latest_tag }}"
+
           # Escape special characters in the changelog for JSON
-          changelog=$(echo "$changelog" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g' | sed "s/'/\\'/g")
+          changelog=$(echo -e "$changelog\n\n$changelog_link" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g' | sed "s/'/\\'/g")
 
           # Format the release body
           body="## Changes in ${{ env.next_tag }}\\n\\n$changelog"
@@ -120,6 +123,24 @@ jobs:
           # Define if the release is a pre-release
           is_prerelease=${{ github.event.inputs.is_prerelease }}
           is_draft=${{ github.event.inputs.is_draft }}
+          release_type=${{ github.event.inputs.release_type }}
+
+          # Dynamically set the release name based on the release type
+          case "$release_type" in
+            patch)
+              release_name="Patch Release ${{ env.next_tag }}"
+              ;;
+            minor)
+              release_name="Minor Release ${{ env.next_tag }}"
+              ;;
+            major)
+              release_name="Major Release ${{ env.next_tag }}"
+              ;;
+            *)
+              echo "Unknown release type: $release_type"
+              exit 1
+              ;;
+          esac
 
           # Create the release using the GitHub API
           response=$(curl -s -o response.json -w "%{http_code}" \
@@ -131,7 +152,7 @@ jobs:
           {
             "tag_name": "${{ env.next_tag }}",
             "target_commitish": "${{ github.sha }}",
-            "name": "Release ${{ env.next_tag }}",
+            "name": "$release_name",
             "body": "${{ env.release_body }}",
             "draft": $is_draft,
             "prerelease": $is_prerelease
