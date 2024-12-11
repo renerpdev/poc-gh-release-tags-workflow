@@ -105,14 +105,9 @@ jobs:
           fi
 
           is_draft=${{ github.event.inputs.is_draft }}
-          if [ "$is_draft" == "false" ]; then
-            head_ref=${{ env.next_tag }}
-          else
-            head_ref=${{ github.ref_name }}
-          fi
 
           # Generate the full changelog link
-          changelog_link="https://github.com/${{ github.repository }}/compare/${{ env.latest_tag }}...$head_ref"
+          changelog_link="https://github.com/${{ github.repository }}/compare/${{ env.latest_tag }}...${{ env.next_tag }}"
 
           # Escape special characters in the changelog for JSON
           changelog=$(echo -e "$changelog\n\nFull Changelog: $changelog_link" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g' | sed "s/'/\\'/g")
