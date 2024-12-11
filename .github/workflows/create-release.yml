@@ -11,6 +11,7 @@ on:
           - patch
           - minor
           - major
+        default: minor
       is_prerelease:
         description: "Create a pre-release"
         required: true
