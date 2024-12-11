@@ -188,9 +188,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "${{ github.event.inputs.is_prerelease }}" == "true" ]; then
-            environment="staging"
+            environment="Staging"
           elif [ "${{ github.event.inputs.is_prerelease }}" == "false" ]; then
-            environment="production"
+            environment="Production"
           else
             echo "Error: Invalid value for is_prerelease input"
             exit 1
