@@ -151,7 +151,7 @@ jobs:
             -d @- << EOF
           {
             "tag_name": "${{ env.next_tag }}",
-            "target_commitish": "${{ github.sha }}",
+            "target_commitish": "${{ github.ref_name }}",
             "name": "$release_name",
             "body": "${{ env.release_body }}",
             "draft": $is_draft,
