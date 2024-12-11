@@ -10,7 +10,6 @@ on:
 permissions:
   pull-requests: write # Allows posting comments to PRs
   contents: write       # Allows access to repo contents
-  actions: write       # Allows access to trigger actions
 
 jobs:
   Preview-Development:
