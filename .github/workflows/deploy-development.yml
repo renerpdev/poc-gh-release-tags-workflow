@@ -24,7 +24,7 @@ jobs:
             -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer $GITHUB_TOKEN" \
-            https://api.github.com/repos/${{ github.repository }}/actions/workflows/create-deployment.yml/dispatches \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/trigger-deployment.yml/dispatches \
             -d @- << EOF
           {
             "ref": "${{ github.ref }}",
