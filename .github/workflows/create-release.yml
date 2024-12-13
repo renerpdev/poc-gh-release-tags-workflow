@@ -28,7 +28,7 @@ permissions:
   actions: write 
 
 jobs:
-  create-release:
+  Create-Release:
     runs-on: ubuntu-latest
 
     steps:

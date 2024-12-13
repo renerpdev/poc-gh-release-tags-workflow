@@ -1,4 +1,4 @@
-name: Create Vercel Deployment
+name: Trigger Vercel Deployment
 
 on:
   workflow_dispatch:
@@ -23,7 +23,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  Create-Deployment:
+  Trigger-Deployment:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.is_preview == 'false' && github.event.inputs.environment || null }}
     env:
