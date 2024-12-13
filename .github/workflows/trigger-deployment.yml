@@ -23,7 +23,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  Trigger-${{ github.event.inputs.environment }}${{ github.event.inputs.is_preview == 'true' && '(Preview)' || '' }}-Deployment:
+  Trigger-${{ github.event.inputs.environment }}${{ github.event.inputs.is_preview == 'true' && '-Preview' || '' }}-Deployment:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.is_preview == 'false' && github.event.inputs.environment || null }}
     env:
