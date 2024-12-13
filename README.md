@@ -21,15 +21,15 @@ The development environment is used for ongoing development and testing of new f
 
 ## About the Project
 
-This project is a intended to showcase how the Tags Release Workflow works. It leverages Vercel's powerful deployment and preview features to maintain separate environments for different stages of development.
+This project is intended to showcase how the Tags Release Workflow works. It leverages Vercel's powerful deployment and preview features to maintain separate environments for different stages of development.
 
 ## Deployment
 
 This project uses Vercel for deployment. Each environment is automatically updated following this workflow:
 
-- Production: on every **release**
-- Staging: on every **pre-release**
-- Development: on merge to `main` branch
+- Production: on every **release** (Preview deployment when creating a draft)
+- Staging: on every **pre-release** (Preview deployment when creating a draft)
+- Development: on merge to `main` branch (Preview deployment on PR open)
 
 ## Getting Started
 
