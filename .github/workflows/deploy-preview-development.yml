@@ -13,6 +13,7 @@ permissions:
 
 jobs:
   Preview-Development:
+    name: Deploy to Development (Preview) 
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
