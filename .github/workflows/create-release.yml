@@ -28,7 +28,7 @@ permissions:
   actions: write 
 
 jobs:
-  Create-Release:
+  Create-${{ github.event.inputs.release_type }}-Release:
     runs-on: ubuntu-latest
 
     steps:
