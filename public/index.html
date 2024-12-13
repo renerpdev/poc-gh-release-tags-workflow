@@ -53,6 +53,7 @@
     <h1>Contact Form</h1>
     <form id="contactForm">
         <input type="text" id="name" placeholder="Name" required>
+        <input type="text" id="lastName" placeholder="Last Name" required>
         <input type="email" id="email" placeholder="Email" required>
         <textarea id="messageContent" placeholder="Message" required></textarea>
         <button type="submit">Submit</button>
@@ -64,6 +65,7 @@
             e.preventDefault();
             
             const name = document.getElementById('name').value;
+            const lastName = document.getElementById('lastName').value;
             const email = document.getElementById('email').value;
             const messageContent = document.getElementById('messageContent').value;
             
@@ -71,6 +73,7 @@
             submissionMessageDiv.innerHTML = `
                 <strong>Form Submitted:</strong><br>
                 Name: ${name}<br>
+                Last Name: ${lastName}<br>
                 Email: ${email}<br>
                 Message: ${messageContent}
             `;
