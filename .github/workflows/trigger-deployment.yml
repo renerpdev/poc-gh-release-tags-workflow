@@ -16,7 +16,7 @@ on:
         description: "Create a preview"
         required: true
         type: boolean
-        default: false
+        default: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.inputs.environment }} ${{ github.event.inputs.is_preview == 'true' && '(Preview)' || '' }}
