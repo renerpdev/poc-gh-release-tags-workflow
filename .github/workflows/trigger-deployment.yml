@@ -75,12 +75,12 @@ jobs:
             vercel_build_flag="--prod"
             vercel_deploy_flag="--prod"
           fi
-          echo "VERCEL_ENV=$vercel_env" >> $GITHUB_ENV
+          echo "VERCEL_JOB_ENV=$vercel_env" >> $GITHUB_ENV
           echo "VERCEL_BUILD_FLAG=$vercel_build_flag" >> $GITHUB_ENV
           echo "VERCEL_DEPLOY_FLAG=$vercel_deploy_flag" >> $GITHUB_ENV
 
       - name: Pull Vercel Environment
-        run: npx vercel pull --yes --environment=$VERCEL_ENV --token=$VERCEL_TOKEN
+        run: npx vercel pull --yes --environment=$VERCEL_JOB_ENV --token=$VERCEL_TOKEN
 
       - name: Build Project Artifacts
         run: npx vercel build $VERCEL_BUILD_FLAG --token=$VERCEL_TOKEN
