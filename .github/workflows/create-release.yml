@@ -179,7 +179,7 @@ jobs:
         run: |
           echo "Release created with tag ${{ env.next_tag }}"
 
-      - name: Trigger Deployment
+      - name: Trigger Deployment Event
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

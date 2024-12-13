@@ -21,7 +21,7 @@ jobs:
     environment:
       name: Production
     steps:
-      - name: Trigger Deployment
+      - name: Trigger Deployment Event
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

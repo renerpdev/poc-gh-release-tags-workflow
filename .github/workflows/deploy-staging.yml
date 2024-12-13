@@ -21,7 +21,7 @@ jobs:
     environment:
       name: Staging
     steps:
-      - name: Trigger Release Event
+      - name: Trigger Deployment Event
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -42,10 +42,10 @@ jobs:
           )
 
           if [ "$response" -ne 204 ]; then
-            echo "Failed to dispatch release event. HTTP response code: $response"
+            echo "Failed to dispatch deployment event. HTTP response code: $response"
             echo "Response body:"
             cat response.json
             exit 1
           else
-            echo "Release event dispatched successfully!"
+            echo "Deployment event dispatched successfully!"
           fi
