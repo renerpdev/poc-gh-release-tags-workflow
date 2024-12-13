@@ -16,7 +16,7 @@ on:
         description: "Create a preview"
         required: true
         type: boolean
-        default: false
+        default: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.inputs.environment }} ${{ github.event.inputs.is_preview == 'true' && '(Preview)' || '' }}
@@ -24,7 +24,7 @@ concurrency:
 
 jobs:
   Trigger-Deployment:
-    name: Trigger-${{ github.event.inputs.environment }}${{ github.event.inputs.is_preview == 'true' && '-Preview' || '' }}-Deployment
+    name: Deploy to ${{ github.event.inputs.environment }} ${{ github.event.inputs.is_preview == 'true' && '(Preview)' || '' }}
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.is_preview == 'false' && github.event.inputs.environment || null }}
     env:
