@@ -28,7 +28,8 @@ permissions:
   actions: write 
 
 jobs:
-  Create-${{ github.event.inputs.release_type }}-Release:
+  Create-Release:
+    name: Create ${{ github.event.inputs.release_type }} ${{ github.event.inputs.is_prerelease == 'true' && 'Pre-release' || 'Release' }} ${{ github.event.inputs.is_draft == 'true' && '(Draft)' || '' }}
     runs-on: ubuntu-latest
 
     steps:
