@@ -141,7 +141,7 @@ Our application uses three environments for deployment:
       - Use `is_draft = true` for a draft release (optional) or `is_draft = false` for a published release.
       - Use `is_prerelease = false` to create a production deployment.
       - Use `release_type = Patch` to create a patched version.
-7. After the hotfix is deployed, you must proceed to create a PR to update the main branch.
+7. After the hotfix is deployed, you must proceed to create a PR to update the main branch. (DO NOT FORGET TO PULL THE LATEST CHANGES FROM THE MAIN BRANCH FIRST)
 
 ---
 
