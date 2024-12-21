@@ -7,6 +7,10 @@ on:
       - synchronize
       - reopened
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
 permissions:
   contents: read           
   pull-requests: write 
@@ -19,30 +23,17 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_DEV_PROJECT_ID }}
+      CI: true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: .nvmrc
-          cache: 'npm'
-
-      - run: npm install
-      - run: npm test
-
-      - name: Pull Vercel Environment
-        run: npx vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
-
-      - name: Build Project Artifacts
-        run: npx vercel build --token=$VERCEL_TOKEN
-
-      - name: Deploy Project Artifacts to Vercel
+      - name: Deploy Project to Vercel
         id: deploy
         run: |
-          DEPLOY_URL=$(npx vercel deploy --prebuilt --token=$VERCEL_TOKEN)
+          # DEPLOY_URL=$(npx vercel deploy --scope $VERCEL_TEAM --token=$VERCEL_TOKEN)
+          DEPLOY_URL=$(npx vercel deploy --token=$VERCEL_TOKEN)
           echo "deployment_url=$DEPLOY_URL" >> $GITHUB_ENV
           echo "Vercel Deployment URL: $DEPLOY_URL"
 
