@@ -172,3 +172,128 @@ When triggering workflows via the **Actions** tab, the following options must be
 - Always test features in the **Development environment** before promoting to staging or production.
 - Use **draft pre-releases** or **draft releases** for testing preview deployments without affecting the actual environments.
 - Coordinate with the team before triggering **staging** or **production deployments**, especially for hotfixes.
+
+
+## Troubleshooting
+
+### 1. Deployment Not Triggered
+
+**Symptoms:**
+- Workflow does not run after a PR is created, merged, or manually dispatched.
+
+**Causes:**
+- The branch filter in the workflow is incorrect.
+- Missing permissions for the `GITHUB_TOKEN`.
+
+**Solutions:**
+1. Ensure the workflow listens to the right events and branches in your YAML file:
+
+```yaml
+on:
+  pull_request:
+    branches:
+      - main
+```
+
+2. Check `permissions` for the `GITHUB_TOKEN`:
+
+```yaml
+permissions:
+  contents: write
+```
+
+---
+
+### 2. Vercel Deployment Fails
+
+**Symptoms:**
+- Deployment step fails with errors like `VERCEL_PROJECT_ID not set`.
+
+**Causes:**
+- Incorrect or missing Vercel secrets (`VERCEL_PROJECT_ID`, `VERCEL_TOKEN`).
+
+**Solutions:**
+1. Confirm the secrets are set in the repository settings under **Secrets and variables**.
+2. Validate the secrets are correctly passed in the workflow:
+
+```yaml
+env:
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+```
+
+---
+
+### 3. Incorrect Version in Release
+
+**Symptoms:**
+- The tag or version number in the release is incorrect.
+
+**Causes:**
+- The workflow does not properly calculate the next version.
+
+**Solutions:**
+1. Ensure the workflow calculates the next version correctly using semantic versioning:
+
+```bash
+# Example: Incrementing a patch version
+latest_version="1.0.0"
+next_version=$(echo $latest_version | awk -F. '{$3++; print $1"."$2"."$3}')
+```
+
+2. Debug the version logic by printing the calculated value in the logs:
+
+```yaml
+- name: Debug Version
+  run: echo "Next version: ${{ env.next_version }}"
+```
+
+---
+
+### 4. Permissions Error for GitHub API Requests
+
+**Symptoms:**
+- Error: `Resource not accessible by integration` or `403 Forbidden`.
+
+**Causes:**
+- The `GITHUB_TOKEN` is missing `workflow` permissions.
+
+**Solutions:**
+- Add `workflow: write` to your workflow permissions:
+
+```yaml
+permissions:
+  contents: write
+  workflows: write
+```
+
+### 5. Reverting a Release and Tag
+
+**Symptoms:**
+- A release and tag were created incorrectly, and you need to delete them to create a new release with the same tag.
+
+**Causes:**
+-	Incorrect release information or a mistake in the associated tag.
+
+**Solutions:**
+##### 1. Delete the Release:
+-  Go to the Releases section of your GitHub repository.
+-  Find the release associated with the incorrect tag.
+-  Click Delete this release.
+
+##### 2. Delete the Tag:
+###### Via the GitHub UI:
+-  Go to the Tags section of your GitHub repository.
+-  Find the the incorrect tag.
+-  Click Delete this tag.
+
+###### Locally via Git:
+
+```bash
+git push --delete origin <tag-name>
+git tag -d <tag-name>
+```
+
+##### 3.	Create a New Release:
+- Go to the Actions section of your repository.
+-	Click on `Create Release` workflow, select the ref branch, and provide the correct information.
