@@ -13,9 +13,8 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             background-color: #f0f0f0;
-            overflow-y: hidden;
         }
         form {
             display: flex;
@@ -47,9 +46,26 @@
         #colorBox{
             transition: background-color ease-in-out 1s;
         }
+        .responsive-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body id="colorBox">
+
+    <img 
+        class="responsive-image" 
+        src="https://images.unsplash.com/photo-1682686581498-5e85c7228119?auto=format&fit=crop&w=800&q=80" 
+        alt="A beautiful landscape with mountains and a lake" 
+        width="300" 
+        height="200"
+    >
+
     <h1>Contact Form</h1>
     <form id="contactForm">
         <input type="text" id="name" placeholder="Name" required>
