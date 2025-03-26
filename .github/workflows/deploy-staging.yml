@@ -15,11 +15,11 @@ permissions:
 
 jobs:
   Deploy-Staging:
-    name: Deploy to ${{ format('{0}{1}', 'Staging', github.event.release.draft == true && ' (Preview)' || '') }}
-    if: (github.event.release.prerelease == true && github.event.release.draft == false) 
+    name: Deploy to Staging
+    if: (github.event.release.prerelease == true && github.event.release.draft == false)
     runs-on: ubuntu-latest
     environment:
-      name: ${{ format('{0}{1}', github.event.release.draft == true && 'Preview-' || '', 'Staging') }}
+      name: Staging
     steps:
       - uses: actions/checkout@v3
 

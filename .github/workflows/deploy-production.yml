@@ -15,11 +15,11 @@ permissions:
   
 jobs:
   Deploy-Production:
-    name: Deploy to ${{ format('{0}{1}', 'Production', github.event.release.draft == true && ' (Preview)' || '') }}
+    name: Deploy to Production
     if: (github.event.release.prerelease == false && github.event.release.draft == false)
     runs-on: ubuntu-latest
     environment:
-      name: ${{ format('{0}{1}', github.event.release.draft == true && 'Preview-' || '', 'Production') }}
+      name: Production
     steps:
       - uses: actions/checkout@v3
       
