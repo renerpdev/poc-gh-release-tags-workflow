@@ -26,7 +26,7 @@ on:
         description: "Post deployment URL as PR comment"
         required: false
         type: boolean
-        default: true
+        default: false
       pr_number:
         description: "Pull Request number to comment on"
         required: false
