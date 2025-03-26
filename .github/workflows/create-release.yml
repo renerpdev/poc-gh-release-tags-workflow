@@ -46,6 +46,22 @@ jobs:
           fetch-depth: 0 # Downloads also the tags
           persist-credentials: false
 
+      - name: Check if ref is a tag
+        id: check-ref
+        run: |
+          if [[ ${{ github.ref }} == refs/tags/* ]]; then
+            echo "is_tag=true" >> $GITHUB_OUTPUT
+            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            echo "is_tag=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Exit if ref is a tag
+        if: steps.check-ref.outputs.is_tag == 'true'
+        run: |
+          echo "You cannot create a release from a tag. Exiting."
+          exit 0
+
       - name: Get latest tag
         id: get-latest-tag
         run: |
