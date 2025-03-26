@@ -64,8 +64,8 @@ runs:
       id: git-info
       shell: bash
       run: |
-        # Get the most recent tag
-        GIT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+        # Get the most recent tag sorted by version
+        GIT_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || echo "v0.0.0")
 
         # Get the current commit hash
         GIT_COMMIT_HASH=$(git rev-parse HEAD)

@@ -200,7 +200,7 @@ jobs:
         with:
           environment: ${{ inputs.is_prerelease == true && 'Staging' || 'Production' }}
           is_preview: ${{ inputs.is_draft }}
-          notify_slack: ${{ inputs.notify_slack }}
+          notify_slack: ${{ inputs.notify_slack && vars.ENABLE_SLACK_NOTIFICATIONS == 'true' }}
           ref: ${{ github.ref }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
