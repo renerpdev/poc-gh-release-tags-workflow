@@ -22,15 +22,6 @@ on:
         required: false
         type: boolean
         default: true
-      post_pr_comment:
-        description: "Post deployment URL as PR comment"
-        required: false
-        type: boolean
-        default: false
-      pr_number:
-        description: "Pull Request number to comment on"
-        required: false
-        type: number
 
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.environment }} ${{ inputs.is_preview == 'true' && '(Preview)' || '' }}
