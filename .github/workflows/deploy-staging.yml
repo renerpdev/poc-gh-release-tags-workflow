@@ -15,19 +15,19 @@ permissions:
 
 jobs:
   Deploy-Staging:
-    name: Deploy to Staging 
+    name: Deploy to ${{ format('{0}{1}', 'Staging', github.event.release.draft == true && ' (Preview)' || '') }}
     if: (github.event.release.prerelease == true && github.event.release.draft == false) 
     runs-on: ubuntu-latest
     environment:
-      name: Staging
+      name: ${{ format('{0}{1}', github.event.release.draft == true && 'Preview-' || '', 'Staging') }}
     steps:
       - uses: actions/checkout@v3
 
       - name: Deploy to Staging
         uses: ./.github/actions/build-and-deploy
         with:
-          environment: Staging
-          is_preview: false
+          environment: 'Staging'
+          is_preview: ${{ github.event.release.draft == true }}
           ref: ${{ github.ref }}
           notify_slack: ${{ vars.ENABLE_SLACK_NOTIFICATIONS == 'true' }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}

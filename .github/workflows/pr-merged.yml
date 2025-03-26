@@ -13,6 +13,7 @@ permissions:
 
 jobs:
   Deploy-Development:
+    name: Deploy to Development
     if: github.event.pull_request.merged == true # Ensure the job only runs if the PR is merged
     runs-on: ubuntu-latest
     environment:

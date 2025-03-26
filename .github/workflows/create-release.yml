@@ -22,6 +22,11 @@ on:
         required: true
         type: boolean
         default: true
+      notify_slack:
+        description: "Send Slack notification"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -29,7 +34,7 @@ permissions:
 
 jobs:
   Create-Release:
-    name: Create ${{ github.event.inputs.release_type }} ${{ github.event.inputs.is_prerelease == 'true' && 'Pre-release' || 'Release' }} ${{ github.event.inputs.is_draft == 'true' && '(Draft)' || '' }}
+    name: Create ${{ format('{0} {1}{2}', github.event.inputs.release_type, github.event.inputs.is_prerelease == 'true' && 'Pre-release' || 'Release', github.event.inputs.is_draft == 'true' && ' (Draft)' || '') }}
     runs-on: ubuntu-latest
     outputs:
       next_tag: ${{ env.next_tag }}
@@ -184,10 +189,10 @@ jobs:
           echo "Release created with tag ${{ env.next_tag }}"
 
   Deploy:
-    name: Deploy to ${{ needs.Create-Release.outputs.is_prerelease == 'true' && 'Staging' || 'Production' }}
+    name: Deploy to ${{ format('{0}{1}', github.event.inputs.environment, github.event.inputs.is_preview == 'true' && ' (Preview)' || '') }}
     needs: Create-Release
     runs-on: ubuntu-latest
-    environment: ${{ needs.Create-Release.outputs.is_prerelease == 'true' && 'Staging' || 'Production' }}
+    environment: ${{ format('{0}{1}', github.event.release.draft == true && 'Preview-' || '', github.event.release.prerelease == true && 'Staging' || 'Production') }}
     steps:
       - uses: actions/checkout@v3
 
@@ -196,7 +201,7 @@ jobs:
         with:
           environment: ${{ needs.Create-Release.outputs.is_prerelease == 'true' && 'Staging' || 'Production' }}
           is_preview: ${{ needs.Create-Release.outputs.is_draft }}
-          notify_slack: ${{ vars.ENABLE_SLACK_NOTIFICATIONS == 'true' }}
+          notify_slack: ${{ github.event.inputs.notify_slack }}
           ref: ${{ github.ref }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}

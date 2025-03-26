@@ -15,19 +15,19 @@ permissions:
   
 jobs:
   Deploy-Production:
-    name: Deploy to Production 
+    name: Deploy to ${{ format('{0}{1}', 'Production', github.event.release.draft == true && ' (Preview)' || '') }}
     if: (github.event.release.prerelease == false && github.event.release.draft == false)
     runs-on: ubuntu-latest
     environment:
-      name: Production
+      name: ${{ format('{0}{1}', github.event.release.draft == true && 'Preview-' || '', 'Production') }}
     steps:
       - uses: actions/checkout@v3
       
       - name: Deploy to Production
         uses: ./.github/actions/build-and-deploy
         with:
-          environment: Production
-          is_preview: false
+          environment: 'Production'
+          is_preview: ${{ github.event.release.draft }}
           ref: ${{ github.ref }}
           notify_slack: ${{ vars.ENABLE_SLACK_NOTIFICATIONS == 'true' }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
