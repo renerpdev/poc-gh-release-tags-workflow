@@ -195,7 +195,7 @@ jobs:
         with:
           environment: ${{ needs.Create-Release.outputs.is_prerelease == 'true' && 'Staging' || 'Production' }}
           is_preview: ${{ needs.Create-Release.outputs.is_draft }}
-          notify_slack: ${{ env.ENABLE_SLACK_NOTIFICATIONS == 'true' }}
+          notify_slack: ${{ vars.ENABLE_SLACK_NOTIFICATIONS == 'true' }}
           post_pr_comment: false
           ref: ${{ github.ref }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
