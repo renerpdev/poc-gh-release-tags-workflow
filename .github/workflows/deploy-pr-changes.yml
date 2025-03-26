@@ -6,11 +6,6 @@ on:
       - opened
       - synchronize
       - reopened
-    paths-ignore:
-      - ".github/**"
-      - "**/*.md"
-      - ".nvmrc"
-      - ".gitignore"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
