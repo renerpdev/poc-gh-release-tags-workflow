@@ -188,19 +188,20 @@ jobs:
         run: |
           echo "Release created with tag ${{ env.next_tag }}"
 
-  Deploy:
-    name: Deploy to ${{ format('{0}{1}', github.event.release.prerelease == true && 'Staging' || 'Production', github.event.release.draft == true && ' (Preview)' || '') }}
+  Deploy-Release:
+    name: Deploy to ${{ format('{0}{1}', github.event.inputs.is_prerelease == true && 'Staging' || 'Production', github.event.inputs.is_draft == true && ' (Preview)' || '') }}
     needs: Create-Release
+    if: ${{ needs.Create-Release.result == 'success' }}
     runs-on: ubuntu-latest
-    environment: ${{ format('{0}{1}', github.event.release.draft == true && 'Preview-' || '', github.event.release.prerelease == true && 'Staging' || 'Production') }}
+    environment: ${{ format('{0}{1}', github.event.inputs.is_draft == true && 'Preview-' || '', github.event.inputs.is_prerelease == true && 'Staging' || 'Production') }}
     steps:
       - uses: actions/checkout@v3
 
       - name: Build and Deploy
         uses: ./.github/actions/build-and-deploy
         with:
-          environment: ${{ needs.Create-Release.outputs.is_prerelease == 'true' && 'Staging' || 'Production' }}
-          is_preview: ${{ needs.Create-Release.outputs.is_draft }}
+          environment: ${{ github.event.inputs.is_prerelease == true && 'Staging' || 'Production' }}
+          is_preview: ${{ github.event.inputs.is_draft }}
           notify_slack: ${{ github.event.inputs.notify_slack }}
           ref: ${{ github.ref }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
