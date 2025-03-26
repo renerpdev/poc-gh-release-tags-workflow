@@ -44,9 +44,7 @@ jobs:
         with:
           environment: ${{ github.event.inputs.environment }}
           is_preview: ${{ github.event.inputs.is_preview }}
-          notify_slack: ${{ github.event.inputs.notify_slack }}
-          post_pr_comment: ${{ github.event.inputs.post_pr_comment }}
-          pr_number: ${{ github.event.inputs.pr_number }}
+          notify_slack: ${{ github.event.inputs.notify_slack && vars.ENABLE_SLACK_NOTIFICATIONS == 'true' }}
           ref: ${{ github.ref }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
