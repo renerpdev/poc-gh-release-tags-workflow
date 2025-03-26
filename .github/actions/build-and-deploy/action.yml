@@ -122,7 +122,7 @@ runs:
         NEXT_PUBLIC_GIT_TAG: ${{ env.GIT_TAG }}
         NEXT_PUBLIC_GIT_COMMIT_HASH: ${{ env.GIT_COMMIT_HASH }}
         NEXT_PUBLIC_BUILD_TIME: ${{ env.BUILD_TIME }}
-      run: npx vercel build --token=${{ inputs.vercel_token }}
+      run: npx vercel build --token=${{ inputs.vercel_token }} --environment=$DEPLOYMENT_TARGET
 
     - name: Deploy to Vercel
       id: deploy
