@@ -1,4 +1,4 @@
-name: Deploy to Development
+name: PR merged to Development
 
 on:
   pull_request:
