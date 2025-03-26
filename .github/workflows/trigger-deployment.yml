@@ -43,10 +43,11 @@ permissions:
 jobs:
   Trigger-Deployment:
     name: Deploy to ${{ github.event.inputs.environment }} ${{ github.event.inputs.is_preview == 'true' && '(Preview)' || '' }}
-    environment: ${{ github.event.inputs.environment }}
+    environment: ${{ github.event.inputs.is_preview == 'true' && format('Preview-{0}', github.event.inputs.environment) || github.event.inputs.environment }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      
       - name: Build and Deploy
         uses: ./.github/actions/build-and-deploy
         with:
