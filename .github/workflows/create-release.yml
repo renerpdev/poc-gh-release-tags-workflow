@@ -60,7 +60,7 @@ jobs:
         if: steps.check-ref.outputs.is_tag == 'true'
         run: |
           echo "You cannot create a release from a tag. Exiting."
-          exit 0
+          exit 1
 
       - name: Get latest tag
         id: get-latest-tag
