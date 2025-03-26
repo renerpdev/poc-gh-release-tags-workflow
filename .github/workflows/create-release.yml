@@ -189,7 +189,7 @@ jobs:
           echo "Release created with tag ${{ env.next_tag }}"
 
   Deploy:
-    name: Deploy to ${{ format('{0}{1}', github.event.inputs.environment, github.event.inputs.is_preview == 'true' && ' (Preview)' || '') }}
+    name: Deploy to ${{ format('{0}{1}', github.event.release.prerelease == true && 'Staging' || 'Production', github.event.release.draft == true && ' (Preview)' || '') }}
     needs: Create-Release
     runs-on: ubuntu-latest
     environment: ${{ format('{0}{1}', github.event.release.draft == true && 'Preview-' || '', github.event.release.prerelease == true && 'Staging' || 'Production') }}
