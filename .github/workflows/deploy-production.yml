@@ -1,0 +1,38 @@
+name: Deploy Release to Production
+
+on:
+  release:
+    types:
+      - released
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: write 
+  
+jobs:
+  Deploy-Production:
+    name: Deploy to Production 
+    if: (github.event.release.prerelease == false && github.event.release.draft == false)
+    runs-on: ubuntu-latest
+    environment:
+      name: Production
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Deploy to Production
+        uses: ./.github/actions/build-and-deploy
+        with:
+          environment: Production
+          is_preview: false
+          ref: ${{ github.ref }}
+          notify_slack: ${{ vars.ENABLE_SLACK_NOTIFICATIONS == 'true' }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          vercel_project_id: ${{ secrets.VERCEL_PROJECT_ID }}
+          slack_token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack_channel_id: ${{ secrets.SLACK_CHANNEL_ID }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
