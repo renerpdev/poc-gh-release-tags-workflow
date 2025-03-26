@@ -86,25 +86,40 @@ runs:
           PR_LINK=""
           VERSION_INFO=""
 
-          # Add release tag info if available and not a default v0.0.0 tag
-          if [ "${{ inputs.git_tag }}" != "v0.0.0" ]; then
+          # Check if the reference is a tag
+          if [[ "${{ inputs.head_ref }}" == refs/tags/* ]]; then
+            # For tags, use the tag name directly
+            TAG_NAME="${NORMALIZED_REF#refs/tags/}"
             if [ "${{ inputs.environment }}" == "Production" ]; then
-              VERSION_INFO=" (release *${{ inputs.git_tag }}*)"
+              ENV_EMOJI=":rocket:"
+              ENV_SUBTITLE=":sparkles: *\`${TAG_NAME}\`* has been successfully deployed to production."
+            elif [ "${{ inputs.environment }}" == "Staging" ]; then
+              ENV_EMOJI=":test_tube:"
+              ENV_SUBTITLE=":sparkles: *\`${TAG_NAME}\`* has been successfully deployed to staging."
             else
-              VERSION_INFO=" (pre-release *${{ inputs.git_tag }}*)"
+              ENV_EMOJI=":hammer_and_wrench:"
+              ENV_SUBTITLE=":sparkles: *\`${TAG_NAME}\`* has been successfully deployed to development."
             fi
-          fi
-
-          if [ "${{ inputs.environment }}" == "Production" ]; then
-            ENV_EMOJI=":rocket:"
-            ENV_SUBTITLE=":sparkles: Branch *\`${NORMALIZED_REF}\`* has been successfully deployed to production${VERSION_INFO}."
-          elif [ "${{ inputs.environment }}" == "Staging" ]; then
-            ENV_EMOJI=":test_tube:"
-            ENV_SUBTITLE=":sparkles: Branch *\`${NORMALIZED_REF}\`* has been successfully deployed to staging${VERSION_INFO}."
           else
-            # Development environment
-            ENV_EMOJI=":hammer_and_wrench:"
-            ENV_SUBTITLE=":sparkles: Branch *\`${NORMALIZED_REF}\`* has been successfully deployed to development."
+            # For branches, include version info if available
+            if [ "${{ inputs.git_tag }}" != "v0.0.0" ]; then
+              if [ "${{ inputs.environment }}" == "Production" ]; then
+                VERSION_INFO=" (release *${{ inputs.git_tag }}*)"
+              else
+                VERSION_INFO=" (pre-release *${{ inputs.git_tag }}*)"
+              fi
+            fi
+
+            if [ "${{ inputs.environment }}" == "Production" ]; then
+              ENV_EMOJI=":rocket:"
+              ENV_SUBTITLE=":sparkles: Branch *\`${NORMALIZED_REF}\`* has been successfully deployed to production${VERSION_INFO}."
+            elif [ "${{ inputs.environment }}" == "Staging" ]; then
+              ENV_EMOJI=":test_tube:"
+              ENV_SUBTITLE=":sparkles: Branch *\`${NORMALIZED_REF}\`* has been successfully deployed to staging${VERSION_INFO}."
+            else
+              ENV_EMOJI=":hammer_and_wrench:"
+              ENV_SUBTITLE=":sparkles: Branch *\`${NORMALIZED_REF}\`* has been successfully deployed to development."
+            fi
           fi
         fi
 
