@@ -34,7 +34,7 @@ permissions:
 
 jobs:
   Create-Release:
-    name: Create ${{ format('{0} {1}{2}', github.event.inputs.release_type, github.event.inputs.is_prerelease == 'true' && 'Pre-release' || 'Release', github.event.inputs.is_draft == 'true' && ' (Draft)' || '') }}
+    name: Create ${{ format('{0} {1}{2}', inputs.release_type, inputs.is_prerelease == 'true' && 'Pre-release' || 'Release', inputs.is_draft == 'true' && ' (Draft)' || '') }}
     runs-on: ubuntu-latest
     outputs:
       next_tag: ${{ env.next_tag }}
@@ -74,7 +74,7 @@ jobs:
           patch=${PARTS[2]:-0}
 
           # Determine release type
-          release_type="${{ github.event.inputs.release_type }}"
+          release_type="${{ inputs.release_type }}"
           case $release_type in
             Patch)
               patch=$((patch + 1))
@@ -112,7 +112,7 @@ jobs:
             changelog=$(git log "${{ env.latest_tag }}".."${{ github.ref_name }}" --pretty=format:"- %h %s" --no-merges)
           fi
 
-          is_draft=${{ github.event.inputs.is_draft }}
+          is_draft=${{ inputs.is_draft }}
 
           # Generate the full changelog link
           changelog_link="https://github.com/${{ github.repository }}/compare/${{ env.latest_tag }}...${{ env.next_tag }}"
@@ -133,9 +133,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Define if the release is a pre-release
-          is_prerelease=${{ github.event.inputs.is_prerelease }}
-          is_draft=${{ github.event.inputs.is_draft }}
-          release_type=${{ github.event.inputs.release_type }}
+          is_prerelease=${{ inputs.is_prerelease }}
+          is_draft=${{ inputs.is_draft }}
+          release_type=${{ inputs.release_type }}
 
           # Dynamically set the release name based on the release type
           case "$release_type" in
@@ -187,20 +187,20 @@ jobs:
           echo "Release created with tag ${{ env.next_tag }}"
 
   Deploy-Release:
-    name: Deploy to ${{ format('{0}{1}', github.event.inputs.is_prerelease == 'true' && 'Staging' || 'Production', github.event.inputs.is_draft == 'true' && ' (Preview)' || '') }}
+    name: Deploy to ${{ format('{0}{1}', inputs.is_prerelease == 'true' && 'Staging' || 'Production', inputs.is_draft == 'true' && ' (Preview)' || '') }}
     needs: Create-Release
     if: ${{ needs.Create-Release.result == 'success' }}
     runs-on: ubuntu-latest
-    environment: ${{ format('{0}{1}', github.event.inputs.is_draft == 'true' && 'Preview-' || '', github.event.inputs.is_prerelease == 'true' && 'Staging' || 'Production') }}
+    environment: ${{ format('{0}{1}', inputs.is_draft == 'true' && 'Preview-' || '', inputs.is_prerelease == 'true' && 'Staging' || 'Production') }}
     steps:
       - uses: actions/checkout@v3
 
       - name: Build and Deploy
         uses: ./.github/actions/build-and-deploy
         with:
-          environment: ${{ github.event.inputs.is_prerelease == 'true' && 'Staging' || 'Production' }}
-          is_preview: ${{ github.event.inputs.is_draft == 'true' }}
-          notify_slack: ${{ github.event.inputs.notify_slack == 'true' }}
+          environment: ${{ inputs.is_prerelease == 'true' && 'Staging' || 'Production' }}
+          is_preview: ${{ inputs.is_draft == 'true' }}
+          notify_slack: ${{ inputs.notify_slack == 'true' }}
           ref: ${{ github.ref }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
