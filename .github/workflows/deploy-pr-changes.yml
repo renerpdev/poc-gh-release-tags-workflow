@@ -27,12 +27,13 @@ jobs:
     environment: Preview-Development
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: Deploy
         uses: ./.github/actions/build-and-deploy
         with:
           environment: "Development"
           is_preview: true
-          notify_slack: true
+          notify_slack: ${{ env.ENABLE_SLACK_NOTIFICATIONS == 'true' }}
           post_pr_comment: true
           pr_number: ${{ github.event.pull_request.number }}
           ref: ${{ github.event.pull_request.head.ref }}
