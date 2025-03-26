@@ -26,7 +26,7 @@ jobs:
         uses: ./.github/actions/build-and-deploy
         with:
           environment: 'Staging'
-          is_preview: ${{ github.event.release.draft == true }}
+          is_preview: ${{ github.event.release.draft }}
           ref: ${{ github.ref }}
           notify_slack: ${{ vars.ENABLE_SLACK_NOTIFICATIONS == 'true' }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}

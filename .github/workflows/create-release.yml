@@ -38,8 +38,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       next_tag: ${{ env.next_tag }}
-      is_prerelease: ${{ github.event.inputs.is_prerelease }}
-      is_draft: ${{ github.event.inputs.is_draft }}
 
     steps:
       - name: Checkout repository
@@ -189,20 +187,20 @@ jobs:
           echo "Release created with tag ${{ env.next_tag }}"
 
   Deploy-Release:
-    name: Deploy to ${{ format('{0}{1}', github.event.inputs.is_prerelease == true && 'Staging' || 'Production', github.event.inputs.is_draft == true && ' (Preview)' || '') }}
+    name: Deploy to ${{ format('{0}{1}', github.event.inputs.is_prerelease == 'true' && 'Staging' || 'Production', github.event.inputs.is_draft == 'true' && ' (Preview)' || '') }}
     needs: Create-Release
     if: ${{ needs.Create-Release.result == 'success' }}
     runs-on: ubuntu-latest
-    environment: ${{ format('{0}{1}', github.event.inputs.is_draft == true && 'Preview-' || '', github.event.inputs.is_prerelease == true && 'Staging' || 'Production') }}
+    environment: ${{ format('{0}{1}', github.event.inputs.is_draft == 'true' && 'Preview-' || '', github.event.inputs.is_prerelease == 'true' && 'Staging' || 'Production') }}
     steps:
       - uses: actions/checkout@v3
 
       - name: Build and Deploy
         uses: ./.github/actions/build-and-deploy
         with:
-          environment: ${{ github.event.inputs.is_prerelease == true && 'Staging' || 'Production' }}
-          is_preview: ${{ github.event.inputs.is_draft }}
-          notify_slack: ${{ github.event.inputs.notify_slack }}
+          environment: ${{ github.event.inputs.is_prerelease == 'true' && 'Staging' || 'Production' }}
+          is_preview: ${{ github.event.inputs.is_draft == 'true' }}
+          notify_slack: ${{ github.event.inputs.notify_slack == 'true' }}
           ref: ${{ github.ref }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
