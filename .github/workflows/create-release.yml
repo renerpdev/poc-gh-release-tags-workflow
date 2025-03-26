@@ -189,12 +189,13 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ needs.Create-Release.outputs.is_prerelease == 'true' && 'Staging' || 'Production' }}
     steps:
-      - name: Deploy
+      - uses: actions/checkout@v3
+      - name: Build and Deploy
         uses: ./.github/actions/build-and-deploy
         with:
           environment: ${{ needs.Create-Release.outputs.is_prerelease == 'true' && 'Staging' || 'Production' }}
           is_preview: ${{ needs.Create-Release.outputs.is_draft }}
-          notify_slack: true
+          notify_slack: ${{ vars.ENABLE_SLACK_NOTIFICATIONS == 'true' }}
           post_pr_comment: false
           ref: ${{ github.ref }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}

@@ -1,7 +1,7 @@
 name: 'Deploy to Vercel'
 description: 'Deploy to Vercel with environment-specific secrets and notifications'
 
-inputs:
+inputs: 
   environment:
     description: 'The environment to deploy to (Development, Staging, Production)'
     required: true
@@ -116,15 +116,6 @@ runs:
         echo "Pulling environment variables from Vercel project..."
         npx vercel pull --yes --environment=$DEPLOYMENT_TARGET --token=${{ inputs.vercel_token }}
 
-        # Extract ENABLE_SLACK_NOTIFICATIONS value
-        env_file=".vercel/.env.$DEPLOYMENT_TARGET.local"
-        if grep -q ENABLE_SLACK_NOTIFICATIONS $env_file; then
-          # Extract and clean up the value (remove quotes, trim whitespace)
-          ENABLE_SLACK_NOTIFICATIONS=$(grep ENABLE_SLACK_NOTIFICATIONS $env_file | cut -d '=' -f2)
-        else
-          ENABLE_SLACK_NOTIFICATIONS="false"
-        fi
-
     - name: Build Project Locally
       shell: bash
       env:
@@ -141,7 +132,6 @@ runs:
           npx vercel deploy \
           --prebuilt \
           --archive=tgz \
-          --scope ${{ inputs.vercel_team }} \
           --token=${{ inputs.vercel_token }} \
           $VERCEL_DEPLOY_FLAG \
         )
@@ -157,7 +147,7 @@ runs:
         pr-number: ${{ inputs.pr_number }}
 
     - name: Send Slack Notification
-      if: ${{ env.ENABLE_SLACK_NOTIFICATIONS == '"true"' && inputs.notify_slack == 'true' }}
+      if: ${{ inputs.notify_slack == 'true' }}
       uses: ./.github/actions/slack-notification
       with:
         slack_token: ${{ inputs.slack_token }}
