@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Deploy
+      - name: Build and Deploy
         uses: ./.github/actions/build-and-deploy
         with:
           environment: ${{ github.event.inputs.environment }}

@@ -132,7 +132,6 @@ runs:
           npx vercel deploy \
           --prebuilt \
           --archive=tgz \
-          --scope ${{ inputs.vercel_team }} \
           --token=${{ inputs.vercel_token }} \
           $VERCEL_DEPLOY_FLAG \
         )
