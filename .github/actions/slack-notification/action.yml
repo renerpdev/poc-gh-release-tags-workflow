@@ -92,13 +92,13 @@ runs:
             TAG_NAME="${NORMALIZED_REF#refs/tags/}"
             if [ "${{ inputs.environment }}" == "Production" ]; then
               ENV_EMOJI=":rocket:"
-              ENV_SUBTITLE=":sparkles: *\`${TAG_NAME}\`* has been successfully deployed to production."
+              ENV_SUBTITLE=":sparkles: Version *\`${TAG_NAME}\`* has been successfully deployed to production."
             elif [ "${{ inputs.environment }}" == "Staging" ]; then
               ENV_EMOJI=":test_tube:"
-              ENV_SUBTITLE=":sparkles: *\`${TAG_NAME}\`* has been successfully deployed to staging."
+              ENV_SUBTITLE=":sparkles: Version *\`${TAG_NAME}\`* has been successfully deployed to staging."
             else
               ENV_EMOJI=":hammer_and_wrench:"
-              ENV_SUBTITLE=":sparkles: *\`${TAG_NAME}\`* has been successfully deployed to development."
+              ENV_SUBTITLE=":sparkles: Version *\`${TAG_NAME}\`* has been successfully deployed to development."
             fi
           else
             # For branches, include version info if available
