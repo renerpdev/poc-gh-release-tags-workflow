@@ -109,6 +109,12 @@ runs:
       shell: bash
       run: echo "NOT IMPLEMENTED YET"
 
+    - name: Clean Vercel Cache
+      shell: bash
+      run: |
+        # Remove any existing Vercel configurations to ensure a clean start
+        rm -rf .vercel
+
     - name: Pull Vercel Environment Variables
       shell: bash
       run: |
@@ -122,7 +128,7 @@ runs:
         NEXT_PUBLIC_GIT_TAG: ${{ env.GIT_TAG }}
         NEXT_PUBLIC_GIT_COMMIT_HASH: ${{ env.GIT_COMMIT_HASH }}
         NEXT_PUBLIC_BUILD_TIME: ${{ env.BUILD_TIME }}
-      run: npx vercel build --token=${{ inputs.vercel_token }} --environment=$DEPLOYMENT_TARGET
+      run: npx vercel build --token=${{ inputs.vercel_token }}
 
     - name: Deploy to Vercel
       id: deploy
