@@ -27,7 +27,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      
+      - name: Validate Changed Files
+        id: validate
+        uses: ./.github/actions/validate-deployment
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build and Deploy
+        if: steps.validate.outputs.should_deploy == 'true'
         uses: ./.github/actions/build-and-deploy
         with:
           environment: "Development"
@@ -43,3 +51,8 @@ jobs:
           slack_channel_id: ${{ secrets.SLACK_PREVIEW_CHANNEL_ID }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           vercel_team: ${{ vars.VERCEL_TEAM }}
+
+      - name: Skip Deployment
+        if: steps.validate.outputs.should_deploy == 'false'
+        run: |
+          echo "No deployment needed for current files! Don't worry, all good!"

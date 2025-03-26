@@ -1,0 +1,43 @@
+name: 'Validate Deployment Files'
+description: 'Validates if the changed files require a deployment'
+
+inputs:
+  github_token:
+    description: 'GitHub token for API access'
+    required: true
+
+outputs:
+  should_deploy:
+    description: 'Whether the changed files require a deployment'
+    value: ${{ steps.validate.outputs.should_deploy }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Validate Changed Files
+      id: validate
+      shell: bash
+      run: |
+        # Get the list of changed files
+        CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }})
+        
+        # Files that should not trigger deployment
+        EXCLUDED_FILES=(
+          ".github/**"
+          "**/*.md"
+          ".nvmrc"
+          ".gitignore"
+        )
+        
+        # Check if any changed files are not in the excluded list
+        SHOULD_DEPLOY=true
+        for file in $CHANGED_FILES; do
+          for pattern in "${EXCLUDED_FILES[@]}"; do
+            if [[ $file == $pattern ]]; then
+              SHOULD_DEPLOY=false
+              break 2
+            fi
+          done
+        done
+        
+        echo "should_deploy=$SHOULD_DEPLOY" >> $GITHUB_OUTPUT 
