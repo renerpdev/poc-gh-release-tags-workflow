@@ -114,6 +114,7 @@ runs:
       run: |
         # Pull environment variables from Vercel project
         echo "Pulling environment variables from Vercel project..."
+        npx vercel pull --yes --token=${{ inputs.vercel_token }}
         npx vercel env pull --yes --environment=$DEPLOYMENT_TARGET --token=${{ inputs.vercel_token }}
 
     - name: Build Project Locally
