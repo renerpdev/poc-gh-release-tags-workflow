@@ -54,10 +54,26 @@ runs:
         # Remove refs/heads/ prefix if present
         NORMALIZED_REF="${NORMALIZED_REF#refs/heads/}"
         
+        # Set environment-specific title
+        if [ "${{ inputs.is_preview }}" == "true" ]; then
+          if [ "${{ inputs.pr_number }}" != "" ]; then
+            ENV_TITLE="*PR Preview Deployment!* :eyes:"
+          else
+            ENV_TITLE="*Preview Deployment!* :eyes:"
+          fi
+        else
+          if [ "${{ inputs.environment }}" == "Production" ]; then
+            ENV_TITLE="*Production Deployment!* :rocket:"
+          elif [ "${{ inputs.environment }}" == "Staging" ]; then
+            ENV_TITLE="*Staging Deployment!* :test_tube:"
+          else
+            ENV_TITLE="*Development Deployment!* :hammer_and_wrench:"
+          fi
+        fi
+
         # Set emoji and title based on environment and preview status
         if [ "${{ inputs.is_preview }}" == "true" ]; then
           ENV_EMOJI=":mag:"
-          ENV_TITLE="*PR Preview Deployment!* :eyes:"
           ENV_SUBTITLE=":sparkles: Feature branch *\`${NORMALIZED_REF}\`* has been deployed for preview in ${{ inputs.environment }}."
 
           # Add PR link if available
@@ -81,16 +97,13 @@ runs:
 
           if [ "${{ inputs.environment }}" == "Production" ]; then
             ENV_EMOJI=":rocket:"
-            ENV_TITLE="*Production Deployment Success!* :tada:"
             ENV_SUBTITLE=":sparkles: Branch *\`${NORMALIZED_REF}\`* has been successfully deployed to production${VERSION_INFO}."
           elif [ "${{ inputs.environment }}" == "Staging" ]; then
             ENV_EMOJI=":test_tube:"
-            ENV_TITLE="*Staging Deployment Success!* :white_check_mark:"
             ENV_SUBTITLE=":sparkles: Branch *\`${NORMALIZED_REF}\`* has been successfully deployed to staging${VERSION_INFO}."
           else
             # Development environment
             ENV_EMOJI=":hammer_and_wrench:"
-            ENV_TITLE="*Development Deployment Success!* :computer:"
             ENV_SUBTITLE=":sparkles: Branch *\`${NORMALIZED_REF}\`* has been successfully deployed to development."
           fi
         fi
