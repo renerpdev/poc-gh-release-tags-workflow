@@ -1,7 +1,7 @@
 name: 'Deploy to Vercel'
 description: 'Deploy to Vercel with environment-specific secrets and notifications'
 
-inputs:
+inputs: 
   environment:
     description: 'The environment to deploy to (Development, Staging, Production)'
     required: true
