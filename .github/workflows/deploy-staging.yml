@@ -18,8 +18,7 @@ jobs:
     name: Deploy to Staging
     if: (github.event.release.prerelease == true && github.event.release.draft == false)
     runs-on: ubuntu-latest
-    environment:
-      name: Staging
+    environment: Staging
     steps:
       - uses: actions/checkout@v3
 

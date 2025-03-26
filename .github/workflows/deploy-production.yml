@@ -18,8 +18,7 @@ jobs:
     name: Deploy to Production
     if: (github.event.release.prerelease == false && github.event.release.draft == false)
     runs-on: ubuntu-latest
-    environment:
-      name: Production
+    environment: Production
     steps:
       - uses: actions/checkout@v3
       
