@@ -49,11 +49,16 @@ runs:
     - name: Send Slack Message
       shell: bash
       run: |
+        # Normalize branch references
+        NORMALIZED_REF="${{ inputs.head_ref }}"
+        # Remove refs/heads/ prefix if present
+        NORMALIZED_REF="${NORMALIZED_REF#refs/heads/}"
+        
         # Set emoji and title based on environment and preview status
         if [ "${{ inputs.is_preview }}" == "true" ]; then
           ENV_EMOJI=":mag:"
           ENV_TITLE="*PR Preview Deployment!* :eyes:"
-          ENV_SUBTITLE=":sparkles: Feature branch *\`${{ inputs.head_ref }}\`* has been deployed for preview in ${{ inputs.environment }}."
+          ENV_SUBTITLE=":sparkles: Feature branch *\`${NORMALIZED_REF}\`* has been deployed for preview in ${{ inputs.environment }}."
 
           # Add PR link if available
           if [ -n "${{ inputs.pr_number }}" ]; then
@@ -77,24 +82,31 @@ runs:
           if [ "${{ inputs.environment }}" == "Production" ]; then
             ENV_EMOJI=":rocket:"
             ENV_TITLE="*Production Deployment Success!* :tada:"
-            ENV_SUBTITLE=":sparkles: Branch *\`${{ inputs.head_ref }}\`* has been successfully deployed to production${VERSION_INFO}."
+            ENV_SUBTITLE=":sparkles: Branch *\`${NORMALIZED_REF}\`* has been successfully deployed to production${VERSION_INFO}."
           elif [ "${{ inputs.environment }}" == "Staging" ]; then
             ENV_EMOJI=":test_tube:"
             ENV_TITLE="*Staging Deployment Success!* :white_check_mark:"
-            ENV_SUBTITLE=":sparkles: Branch *\`${{ inputs.head_ref }}\`* has been successfully deployed to staging${VERSION_INFO}."
+            ENV_SUBTITLE=":sparkles: Branch *\`${NORMALIZED_REF}\`* has been successfully deployed to staging${VERSION_INFO}."
           else
             # Development environment
             ENV_EMOJI=":hammer_and_wrench:"
             ENV_TITLE="*Development Deployment Success!* :computer:"
-            ENV_SUBTITLE=":sparkles: Branch *\`${{ inputs.head_ref }}\`* has been successfully deployed to development."
+            ENV_SUBTITLE=":sparkles: Branch *\`${NORMALIZED_REF}\`* has been successfully deployed to development."
           fi
         fi
 
-        curl -X POST \
+        # Capture response to debug potential errors
+        RESPONSE=$(curl -s -X POST \
         -H "Authorization: Bearer ${{ inputs.slack_token }}" \
         -H "Content-type: application/json" \
         --data '{
           "channel": "${{ inputs.slack_channel_id }}",
           "text": "'"$ENV_EMOJI"' '"$ENV_TITLE"'\n>'"$ENV_SUBTITLE"'\n>:link: <${{ inputs.deployment_url }}|Visit the site>'"$PR_LINK"'\n>:hash: Commit: ${{ inputs.git_commit_hash }}\n>:alarm_clock: Deployed at ${{ inputs.build_time }}"
         }' \
-        https://slack.com/api/chat.postMessage
+        https://slack.com/api/chat.postMessage)
+        
+        # Check for errors
+        if [ "$(echo $RESPONSE | grep -c '"ok":false')" -gt 0 ]; then
+          echo "Error sending Slack message: $RESPONSE"
+          exit 1
+        fi
