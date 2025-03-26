@@ -109,12 +109,6 @@ runs:
       shell: bash
       run: echo "NOT IMPLEMENTED YET"
 
-    - name: Clean Vercel Cache
-      shell: bash
-      run: |
-        # Remove any existing Vercel configurations to ensure a clean start
-        rm -rf .vercel
-
     - name: Pull Vercel Environment Variables
       shell: bash
       run: |
