@@ -24,7 +24,7 @@ on:
         default: false
 
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.environment }} ${{ inputs.is_preview == 'true' && '(Preview)' || '' }}
+  group: ${{ github.workflow }}-${{ inputs.environment }} ${{ inputs.is_preview == true && '(Preview)' || '' }}
   cancel-in-progress: false
 
 permissions:
@@ -33,8 +33,8 @@ permissions:
 
 jobs:
   Trigger-Deployment:
-    name: Deploy to ${{ format('{0}{1}', inputs.environment, inputs.is_preview == 'true' && ' (Preview)' || '') }}
-    environment: ${{ format('{0}{1}', inputs.is_preview == 'true' && 'Preview-' || '', inputs.environment) }}
+    name: Deploy to ${{ format('{0}{1}', inputs.environment, inputs.is_preview == true && ' (Preview)' || '') }}
+    environment: ${{ format('{0}{1}', inputs.is_preview == true && 'Preview-' || '', inputs.environment) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
