@@ -1,0 +1,100 @@
+name: "Send Slack Notification"
+description: "Sends a deployment notification to Slack"
+inputs:
+  slack_token:
+    description: "Slack API token"
+    required: true
+  slack_channel_id:
+    description: "Slack channel ID"
+    required: true
+  deployment_url:
+    description: "The URL of the deployed application"
+    required: true
+  git_tag:
+    description: "The current Git tag/version"
+    required: true
+  git_commit_hash:
+    description: "The Git commit hash"
+    required: true
+  build_time:
+    description: "The build timestamp"
+    required: true
+  environment:
+    description: "The deployment environment (Development, Staging, Production)"
+    required: true
+    default: "Production"
+  is_preview:
+    description: "Whether this is a preview deployment"
+    required: false
+    default: "false"
+  pr_number:
+    description: "The PR number if this is a PR preview deployment"
+    required: false
+    default: ""
+  repo_owner:
+    description: "The repository owner"
+    required: false
+    default: ${{ github.repository_owner }}
+  repo_name:
+    description: "The repository name"
+    required: false
+    default: ${{ github.event.repository.name }}
+  head_ref:
+    description: "The head reference or branch name for preview deployments"
+    required: false
+    default: ${{ github.head_ref || github.ref_name }}
+runs:
+  using: "composite"
+  steps:
+    - name: Send Slack Message
+      shell: bash
+      run: |
+        # Set emoji and title based on environment and preview status
+        if [ "${{ inputs.is_preview }}" == "true" ]; then
+          ENV_EMOJI=":mag:"
+          ENV_TITLE="*PR Preview Deployment!* :eyes:"
+          ENV_SUBTITLE=":sparkles: Feature branch *\`${{ inputs.head_ref }}\`* has been deployed for preview in ${{ inputs.environment }}."
+
+          # Add PR link if available
+          if [ -n "${{ inputs.pr_number }}" ]; then
+            PR_LINK="\n>:twisted_rightwards_arrows: <https://github.com/${{ inputs.repo_owner }}/${{ inputs.repo_name }}/pull/${{ inputs.pr_number }}|PR #${{ inputs.pr_number }}>"
+          else
+            PR_LINK=""
+          fi
+        else
+          PR_LINK=""
+          VERSION_INFO=""
+
+          # Add release tag info if available and not a default v0.0.0 tag
+          if [ "${{ inputs.git_tag }}" != "v0.0.0" ]; then
+            if [ "${{ inputs.environment }}" == "Production" ]; then
+              VERSION_INFO=" (release *${{ inputs.git_tag }}*)"
+            else
+              VERSION_INFO=" (pre-release *${{ inputs.git_tag }}*)"
+            fi
+          fi
+
+          if [ "${{ inputs.environment }}" == "Production" ]; then
+            ENV_EMOJI=":rocket:"
+            ENV_TITLE="*Production Deployment Success!* :tada:"
+            ENV_SUBTITLE=":sparkles: Branch *\`${{ inputs.head_ref }}\`* has been successfully deployed to production${VERSION_INFO}."
+          elif [ "${{ inputs.environment }}" == "Staging" ]; then
+            ENV_EMOJI=":test_tube:"
+            ENV_TITLE="*Staging Deployment Success!* :white_check_mark:"
+            ENV_SUBTITLE=":sparkles: Branch *\`${{ inputs.head_ref }}\`* has been successfully deployed to staging${VERSION_INFO}."
+          else
+            # Development environment
+            ENV_EMOJI=":hammer_and_wrench:"
+            ENV_TITLE="*Development Deployment Success!* :computer:"
+            ENV_SUBTITLE=":sparkles: Branch *\`${{ inputs.head_ref }}\`* has been successfully deployed to development."
+          fi
+        fi
+
+        curl -X POST \
+        -H "Authorization: Bearer ${{ inputs.slack_token }}" \
+        -H "Content-type: application/json" \
+        --data '{
+          "channel": "${{ inputs.slack_channel_id }}",
+          "text": "'"$ENV_EMOJI"' '"$ENV_TITLE"'\n>'"$ENV_SUBTITLE"'\n>:link: <${{ inputs.deployment_url }}|Visit the site>'"$PR_LINK"'\n>:hash: Commit: ${{ inputs.git_commit_hash }}\n>:alarm_clock: Deployed at ${{ inputs.build_time }}"
+        }' \
+        https://slack.com/api/chat.postMessage

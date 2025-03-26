@@ -17,55 +17,48 @@ on:
         required: true
         type: boolean
         default: true
+      notify_slack:
+        description: "Send Slack notification"
+        required: false
+        type: boolean
+        default: true
+      post_pr_comment:
+        description: "Post deployment URL as PR comment"
+        required: false
+        type: boolean
+        default: true
+      pr_number:
+        description: "Pull Request number to comment on"
+        required: false
+        type: number
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.inputs.environment }} ${{ github.event.inputs.is_preview == 'true' && '(Preview)' || '' }}
+  group: ${{ github.workflow }}-${{ inputs.environment }} ${{ inputs.is_preview == 'true' && '(Preview)' || '' }}
   cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   Trigger-Deployment:
     name: Deploy to ${{ github.event.inputs.environment }} ${{ github.event.inputs.is_preview == 'true' && '(Preview)' || '' }}
+    environment: ${{ github.event.inputs.environment }}
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.is_preview == 'false' && github.event.inputs.environment || null }}
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_TEAM: ${{ vars.VERCEL_TEAM }}
-      CI: true
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Deploy
+        uses: ./.github/actions/build-and-deploy
         with:
-          fetch-depth: 0 # Downloads also the tags
+          environment: ${{ github.event.inputs.environment }}
+          is_preview: ${{ github.event.inputs.is_preview }}
+          notify_slack: ${{ github.event.inputs.notify_slack }}
+          post_pr_comment: ${{ github.event.inputs.post_pr_comment }}
+          pr_number: ${{ github.event.inputs.pr_number }}
           ref: ${{ github.ref }}
-
-      - name: Set Vercel Project ID
-        run: |
-          case "${{ github.event.inputs.environment }}" in
-            Development)
-              echo "VERCEL_PROJECT_ID=${{ secrets.VERCEL_DEV_PROJECT_ID }}" >> $GITHUB_ENV
-              ;;
-            Staging)
-              echo "VERCEL_PROJECT_ID=${{ secrets.VERCEL_STAGING_PROJECT_ID }}" >> $GITHUB_ENV
-              ;;
-            Production)
-              echo "VERCEL_PROJECT_ID=${{ secrets.VERCEL_PROD_PROJECT_ID }}" >> $GITHUB_ENV
-              ;;
-            *)
-              echo "Unknown environment: ${{ github.event.inputs.environment }}"
-              exit 1
-              ;;
-          esac
-
-      - name: Determine Deployment Flag
-        run: |
-          if [ "${{ github.event.inputs.is_preview }}" == "true" ]; then
-            vercel_deploy_flag=""
-          else
-            vercel_deploy_flag="--prod"
-          fi
-          echo "VERCEL_DEPLOY_FLAG=$vercel_deploy_flag" >> $GITHUB_ENV
-
-      - name: Deploy to Vercel
-        # run: npx vercel deploy --scope $VERCEL_TEAM $VERCEL_DEPLOY_FLAG --token=$VERCEL_TOKEN
-        run: npx vercel deploy $VERCEL_DEPLOY_FLAG --token=$VERCEL_TOKEN
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          vercel_project_id: ${{ secrets.VERCEL_PROJECT_ID }}
+          slack_token: ${{ secrets.SLACK_TOKEN }}
+          slack_channel_id: ${{ secrets.SLACK_CHANNEL_ID }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          vercel_team: ${{ vars.VERCEL_TEAM }}

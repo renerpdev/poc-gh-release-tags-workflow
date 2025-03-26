@@ -1,0 +1,174 @@
+name: 'Deploy to Vercel'
+description: 'Deploy to Vercel with environment-specific secrets and notifications'
+
+inputs:
+  environment:
+    description: 'The environment to deploy to (Development, Staging, Production)'
+    required: true
+  is_preview:
+    description: 'Whether this is a preview deployment'
+    required: true
+  notify_slack:
+    description: 'Whether to send Slack notifications'
+    required: false
+    default: 'true'
+  post_pr_comment:
+    description: 'Whether to post a comment on the PR'
+    required: false
+    default: 'true'
+  pr_number:
+    description: 'The PR number to comment on'
+    required: false
+  ref:
+    description: 'The git ref to deploy'
+    required: false
+    default: ${{ github.ref }}
+  vercel_org_id:
+    description: 'Vercel organization ID'
+    required: true
+  vercel_token:
+    description: 'Vercel authentication token'
+    required: true
+  vercel_project_id:
+    description: 'Vercel project ID'
+    required: true
+  slack_token:
+    description: 'Slack authentication token'
+    required: true
+  slack_channel_id:
+    description: 'Slack channel ID for notifications'
+    required: true
+  gh_token:
+    description: 'GitHub authentication token'
+    required: true
+  vercel_team:
+    description: 'Vercel team name'
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 # Downloads also the tags
+        ref: ${{ inputs.ref }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: ".nvmrc"
+        cache: "npm"
+
+    - name: Extract Git information
+      id: git-info
+      shell: bash
+      run: |
+        # Get the most recent tag
+        GIT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+
+        # Get the current commit hash
+        GIT_COMMIT_HASH=$(git rev-parse HEAD)
+
+        # Get build time
+        BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+        # Output the values for debugging
+        echo "Git Tag: $GIT_TAG"
+        echo "Git Commit Hash: $GIT_COMMIT_HASH"
+        echo "Build Time: $BUILD_TIME"
+
+        # Set the outputs for later steps
+        echo "GIT_TAG=$GIT_TAG" >> $GITHUB_ENV
+        echo "GIT_COMMIT_HASH=$GIT_COMMIT_HASH" >> $GITHUB_ENV
+        echo "BUILD_TIME=$BUILD_TIME" >> $GITHUB_ENV
+
+    - name: Set Vercel Project ID and Organization ID
+      shell: bash
+      run: |
+        echo "VERCEL_PROJECT_ID=${{ inputs.vercel_project_id }}" >> $GITHUB_ENV
+        echo "VERCEL_ORG_ID=${{ inputs.vercel_org_id }}" >> $GITHUB_ENV
+
+    - name: Determine Deployment Flag
+      shell: bash
+      run: |
+        if [ "${{ inputs.is_preview }}" == "true" ]; then
+          echo "VERCEL_DEPLOY_FLAG=" >> $GITHUB_ENV
+          echo "DEPLOYMENT_TARGET=preview" >> $GITHUB_ENV
+        else
+          echo "VERCEL_DEPLOY_FLAG=--prod" >> $GITHUB_ENV
+          echo "DEPLOYMENT_TARGET=production" >> $GITHUB_ENV
+        fi
+
+    - name: Install Dependencies
+      shell: bash
+      run: npm ci
+
+    - name: Run tests
+      if: inputs.is_preview == 'true' && inputs.environment == 'Development'
+      shell: bash
+      run: echo "NOT IMPLEMENTED YET"
+
+    - name: Pull Vercel Environment Variables
+      shell: bash
+      run: |
+        # Pull environment variables from Vercel project
+        echo "Pulling environment variables from Vercel project..."
+        npx vercel pull --yes --environment=$DEPLOYMENT_TARGET --token=${{ inputs.vercel_token }}
+
+        # Extract ENABLE_SLACK_NOTIFICATIONS value
+        env_file=".vercel/.env.$DEPLOYMENT_TARGET.local"
+        if grep -q ENABLE_SLACK_NOTIFICATIONS $env_file; then
+          # Extract and clean up the value (remove quotes, trim whitespace)
+          ENABLE_SLACK_NOTIFICATIONS=$(grep ENABLE_SLACK_NOTIFICATIONS $env_file | cut -d '=' -f2)
+        else
+          ENABLE_SLACK_NOTIFICATIONS="false"
+        fi
+
+    - name: Build Project Locally
+      shell: bash
+      env:
+        NEXT_PUBLIC_GIT_TAG: ${{ env.GIT_TAG }}
+        NEXT_PUBLIC_GIT_COMMIT_HASH: ${{ env.GIT_COMMIT_HASH }}
+        NEXT_PUBLIC_BUILD_TIME: ${{ env.BUILD_TIME }}
+      run: npx vercel build --token=${{ inputs.vercel_token }}
+
+    - name: Deploy to Vercel
+      id: deploy
+      shell: bash
+      run: |
+        DEPLOY_URL=$(\
+          npx vercel deploy \
+          --prebuilt \
+          --archive=tgz \
+          --scope ${{ inputs.vercel_team }} \
+          --token=${{ inputs.vercel_token }} \
+          $VERCEL_DEPLOY_FLAG \
+        )
+        echo "deployment_url=$DEPLOY_URL" >> $GITHUB_ENV
+        echo "Vercel Deployment URL: $DEPLOY_URL"
+
+    - name: Post PR Comment
+      if: ${{ inputs.post_pr_comment == 'true' && inputs.pr_number != '' }}
+      uses: ./.github/actions/post-pr-comment
+      with:
+        github-token: ${{ inputs.gh_token }}
+        deployment-url: ${{ env.deployment_url }}
+        pr-number: ${{ inputs.pr_number }}
+
+    - name: Send Slack Notification
+      if: ${{ env.ENABLE_SLACK_NOTIFICATIONS == '"true"' && inputs.notify_slack == 'true' }}
+      uses: ./.github/actions/slack-notification
+      with:
+        slack_token: ${{ inputs.slack_token }}
+        slack_channel_id: ${{ inputs.slack_channel_id }}
+        deployment_url: ${{ env.deployment_url }}
+        git_tag: ${{ env.GIT_TAG }}
+        git_commit_hash: ${{ env.GIT_COMMIT_HASH }}
+        build_time: ${{ env.BUILD_TIME }}
+        environment: ${{ inputs.environment }}
+        is_preview: ${{ inputs.is_preview }}
+        pr_number: ${{ inputs.pr_number }}
+        repo_owner: ${{ github.repository_owner }}
+        repo_name: ${{ github.event.repository.name }}
+        head_ref: ${{ inputs.ref }} 
