@@ -130,23 +130,22 @@ runs:
       id: deploy
       shell: bash
       run: |
-        # Try to deploy
+        # Set up error handling
+        set -e
+        trap 'echo "DEPLOYMENT_STATUS=failure" >> $GITHUB_ENV' ERR
+        
+        # Deploy to Vercel
         DEPLOY_URL=$(npx vercel deploy \
           --prebuilt \
           --archive=tgz \
           # TODO: remove, this is just to break the workflow
           --token=${{ inputs.vercel_token }} \
-          $VERCEL_DEPLOY_FLAG 2>&1)
+          $VERCEL_DEPLOY_FLAG)
         
-        # Check if the deployment was successful
-        if [[ $? -eq 0 && ! "$DEPLOY_URL" =~ "Error:" ]]; then
-          echo "deployment_url=$DEPLOY_URL" >> $GITHUB_ENV
-          echo "Vercel Deployment URL: $DEPLOY_URL"
-          echo "DEPLOYMENT_STATUS=success" >> $GITHUB_ENV
-        else
-          echo "Deployment failed: $DEPLOY_URL"
-          echo "DEPLOYMENT_STATUS=failure" >> $GITHUB_ENV
-        fi
+        # If we get here, deployment was successful
+        echo "deployment_url=$DEPLOY_URL" >> $GITHUB_ENV
+        echo "Vercel Deployment URL: $DEPLOY_URL"
+        echo "DEPLOYMENT_STATUS=success" >> $GITHUB_ENV
 
     - name: Post PR Comment
       if: ${{ inputs.post_pr_comment == 'true' && inputs.pr_number != '' && env.DEPLOYMENT_STATUS == 'success' }}
