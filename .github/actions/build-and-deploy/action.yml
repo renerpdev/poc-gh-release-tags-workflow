@@ -109,11 +109,11 @@ runs:
       shell: bash
       run: echo "NOT IMPLEMENTED YET"
 
-    - name: Pull Vercel Environment Variables
+    - name: Pull Vercel Environment Settings
       shell: bash
       run: |
-        # Pull environment variables from Vercel project
-        echo "Pulling environment variables from Vercel project..."
+        # Pull environment settings from Vercel project
+        echo "Pulling environment settings from Vercel project..."
         npx vercel pull --yes --environment=$DEPLOYMENT_TARGET --token=${{ inputs.vercel_token }}
 
     - name: Build Project Locally
@@ -134,7 +134,6 @@ runs:
           npx vercel deploy \
           --prebuilt \
           --archive=tgz \
-          # TODO: remove, this is just to break the workflo
           --token=${{ inputs.vercel_token }} \
           $VERCEL_DEPLOY_FLAG \
         )
