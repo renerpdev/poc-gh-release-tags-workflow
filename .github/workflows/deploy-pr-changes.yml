@@ -24,6 +24,8 @@ jobs:
       CI: true
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Validate Changed Files
         id: validate

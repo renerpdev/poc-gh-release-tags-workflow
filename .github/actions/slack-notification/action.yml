@@ -20,7 +20,7 @@ inputs:
     description: "The build timestamp"
     required: true
   environment:
-    description: "The deployment environment (Development, Staging, Production)"
+    description: "The deployment environment to notify"
     required: true
     default: "Production"
   is_preview:
@@ -57,7 +57,7 @@ runs:
         NORMALIZED_REF="${{ inputs.head_ref }}"
         # Remove refs/heads/ prefix if present
         NORMALIZED_REF="${NORMALIZED_REF#refs/heads/}"
-        
+
         # Set environment-specific title
         if [ "${{ inputs.is_preview }}" == "true" ]; then
           if [ "${{ inputs.pr_number }}" != "" ]; then
@@ -133,17 +133,19 @@ runs:
           ENV_EMOJI=":x:"
           ENV_SUBTITLE="${{ inputs.error_message }}"
           DEPLOYMENT_INFO=">:x: Deployment failed"
+          MESSAGE="$ENV_EMOJI $ENV_TITLE\n>$ENV_SUBTITLE\n$DEPLOYMENT_INFO$PR_LINK"
         else
           DEPLOYMENT_INFO=">:link: <${{ inputs.deployment_url }}|Visit the site>"
+          MESSAGE="$ENV_EMOJI $ENV_TITLE\n>$ENV_SUBTITLE\n$DEPLOYMENT_INFO$PR_LINK\n>:hash: Commit: ${{ inputs.git_commit_hash }}\n>:alarm_clock: Deployed at ${{ inputs.build_time }}"
         fi
 
         # Capture response to debug potential errors
         RESPONSE=$(curl -s -X POST \
         -H "Authorization: Bearer ${{ inputs.slack_token }}" \
         -H "Content-type: application/json" \
-        --data "{\"channel\":\"${{ inputs.slack_channel_id }}\",\"text\":\"$ENV_EMOJI $ENV_TITLE\n>$ENV_SUBTITLE\n$DEPLOYMENT_INFO$PR_LINK\n>:hash: Commit: ${{ inputs.git_commit_hash }}\n>:alarm_clock: Deployed at ${{ inputs.build_time }}\"}" \
+        --data "{\"channel\":\"${{ inputs.slack_channel_id }}\",\"text\":\"$MESSAGE\"}" \
         https://slack.com/api/chat.postMessage)
-        
+
         # Check for errors
         if [ "$(echo $RESPONSE | grep -c '"ok":false')" -gt 0 ]; then
           echo "Error sending Slack message: $RESPONSE"

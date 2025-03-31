@@ -40,8 +40,11 @@ jobs:
       CI: true
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Downloads also the tags
 
       - name: Build and Deploy
+        id: build-and-deploy
         uses: ./.github/actions/build-and-deploy
         with:
           environment: ${{ inputs.environment }}
@@ -55,3 +58,21 @@ jobs:
           slack_channel_id: ${{ secrets.SLACK_CHANNEL_ID }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           vercel_team: ${{ vars.VERCEL_TEAM }}
+
+      - name: Send Error Notification
+        if: ${{ failure() && inputs.notify_slack && vars.ENABLE_SLACK_NOTIFICATIONS == 'true' }}
+        uses: ./.github/actions/slack-notification
+        with:
+          slack_token: ${{ secrets.SLACK_TOKEN }}
+          slack_channel_id: ${{ secrets.SLACK_CHANNEL_ID }}
+          deployment_url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          git_tag: ${{ steps.build-and-deploy.outputs.git_tag }}
+          git_commit_hash: ${{ steps.build-and-deploy.outputs.git_commit_hash }}
+          build_time: ${{ steps.build-and-deploy.outputs.build_time }}
+          environment: ${{ inputs.environment }}
+          is_preview: ${{ inputs.is_preview }}
+          pr_number: ${{ inputs.pr_number }}
+          repo_owner: ${{ github.repository_owner }}
+          repo_name: ${{ github.event.repository.name }}
+          head_ref: ${{ inputs.ref }}
+          error_message: ${{ steps.build-and-deploy.outputs.error_message }}

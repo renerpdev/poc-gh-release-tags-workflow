@@ -3,7 +3,7 @@ description: "Deploy to Vercel with environment-specific secrets and notificatio
 
 inputs:
   environment:
-    description: "The environment to deploy to (Development, Staging, Production)"
+    description: "The environment to deploy to"
     required: true
   is_preview:
     description: "Whether this is a preview deployment"
@@ -48,12 +48,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0 # Downloads also the tags
-        ref: ${{ inputs.ref }}
-
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
@@ -130,15 +124,27 @@ runs:
       id: deploy
       shell: bash
       run: |
-        DEPLOY_URL=$(\
-          npx vercel deploy \
+        # Capture both stdout and stderr
+        DEPLOY_OUTPUT=$(npx vercel deploy \
           --prebuilt \
           --archive=tgz \
+          #TODO: remove this is just to break the workflow
           --token=${{ inputs.vercel_token }} \
-          $VERCEL_DEPLOY_FLAG \
-        )
-        echo "deployment_url=$DEPLOY_URL" >> $GITHUB_ENV
-        echo "Vercel Deployment URL: $DEPLOY_URL"
+          $VERCEL_DEPLOY_FLAG 2>&1)
+        
+        # Check if the output contains a URL (success case)
+        if [[ $DEPLOY_OUTPUT =~ https://[^\s]+ ]]; then
+          DEPLOY_URL=$BASH_REMATCH
+          echo "deployment_url=$DEPLOY_URL" >> $GITHUB_ENV
+          echo "Vercel Deployment URL: $DEPLOY_URL"
+        else
+          # If no URL found, it's an error
+          echo "::error::$DEPLOY_OUTPUT"
+          echo "error_message<<EOF" >> $GITHUB_ENV
+          echo "$DEPLOY_OUTPUT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          exit 1
+        fi
 
     - name: Post PR Comment
       if: ${{ inputs.post_pr_comment == 'true' && inputs.pr_number != '' && steps.deploy.outcome == 'success' }}
@@ -164,21 +170,3 @@ runs:
         repo_owner: ${{ github.repository_owner }}
         repo_name: ${{ github.event.repository.name }}
         head_ref: ${{ inputs.ref }}
-
-    - name: Send Error Notification
-      if: ${{ inputs.notify_slack == 'true' && (steps.build.outcome == 'failure' || steps.deploy.outcome == 'failure') }}
-      uses: ./.github/actions/slack-notification
-      with:
-        slack_token: ${{ inputs.slack_token }}
-        slack_channel_id: ${{ inputs.slack_channel_id }}
-        deployment_url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-        git_tag: ${{ env.GIT_TAG }}
-        git_commit_hash: ${{ env.GIT_COMMIT_HASH }}
-        build_time: ${{ env.BUILD_TIME }}
-        environment: ${{ inputs.environment }}
-        is_preview: ${{ inputs.is_preview }}
-        pr_number: ${{ inputs.pr_number }}
-        repo_owner: ${{ github.repository_owner }}
-        repo_name: ${{ github.event.repository.name }}
-        head_ref: ${{ inputs.ref }}
-        error_message: "Deployment failed. Click the link below to view the GitHub Actions logs and debug the issue."
