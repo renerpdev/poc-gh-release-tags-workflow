@@ -130,33 +130,31 @@ runs:
       id: deploy
       shell: bash
       run: |
-        # Set up error handling
-        set -e
-        trap 'echo "DEPLOYMENT_STATUS=failure" >> $GITHUB_ENV' ERR
+        # Create a status file
+        echo "status=failure" > deploy_status.txt
         
-        # Deploy to Vercel
-        DEPLOY_URL=$(npx vercel deploy \
+        # Try to deploy
+        if DEPLOY_URL=$(npx vercel deploy \
           --prebuilt \
           --archive=tgz \
           # TODO: remove, this is just to break the workflow
           --token=${{ inputs.vercel_token }} \
-          $VERCEL_DEPLOY_FLAG)
-        
-        # If we get here, deployment was successful
-        echo "deployment_url=$DEPLOY_URL" >> $GITHUB_ENV
-        echo "Vercel Deployment URL: $DEPLOY_URL"
-        echo "DEPLOYMENT_STATUS=success" >> $GITHUB_ENV
+          $VERCEL_DEPLOY_FLAG); then
+          echo "deployment_url=$DEPLOY_URL" >> $GITHUB_ENV
+          echo "Vercel Deployment URL: $DEPLOY_URL"
+          echo "status=success" > deploy_status.txt
+        fi
 
     - name: Post PR Comment
-      if: ${{ inputs.post_pr_comment == 'true' && inputs.pr_number != '' && env.DEPLOYMENT_STATUS == 'success' }}
+      if: ${{ inputs.post_pr_comment == 'true' && inputs.pr_number != '' && contains(run.steps.deploy.outputs.status, 'success') }}
       uses: ./.github/actions/post-pr-comment
       with:
         github-token: ${{ inputs.gh_token }}
         deployment-url: ${{ env.deployment_url }}
         pr-number: ${{ inputs.pr_number }}
 
-    - name: Send Slack Notification
-      if: ${{ inputs.notify_slack == 'true' && env.DEPLOYMENT_STATUS == 'success' }}
+    - name: Send Success Notification
+      if: ${{ inputs.notify_slack == 'true' && contains(run.steps.deploy.outputs.status, 'success') }}
       uses: ./.github/actions/slack-notification
       with:
         slack_token: ${{ inputs.slack_token }}
@@ -173,7 +171,7 @@ runs:
         head_ref: ${{ inputs.ref }}
 
     - name: Send Error Notification
-      if: ${{ inputs.notify_slack == 'true' && env.DEPLOYMENT_STATUS == 'failure' }}
+      if: ${{ inputs.notify_slack == 'true' && contains(run.steps.deploy.outputs.status, 'failure') }}
       uses: ./.github/actions/slack-notification
       with:
         slack_token: ${{ inputs.slack_token }}
