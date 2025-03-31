@@ -131,16 +131,20 @@ runs:
       shell: bash
       run: |
         # Try to deploy
-        if DEPLOY_URL=$(npx vercel deploy \
+        DEPLOY_URL=$(npx vercel deploy \
           --prebuilt \
           --archive=tgz \
           # TODO: remove, this is just to break the workflow
           --token=${{ inputs.vercel_token }} \
-          $VERCEL_DEPLOY_FLAG); then
+          $VERCEL_DEPLOY_FLAG 2>&1)
+        
+        # Check if the deployment was successful
+        if [[ $? -eq 0 && ! "$DEPLOY_URL" =~ "Error:" ]]; then
           echo "deployment_url=$DEPLOY_URL" >> $GITHUB_ENV
           echo "Vercel Deployment URL: $DEPLOY_URL"
           echo "DEPLOYMENT_STATUS=success" >> $GITHUB_ENV
         else
+          echo "Deployment failed: $DEPLOY_URL"
           echo "DEPLOYMENT_STATUS=failure" >> $GITHUB_ENV
         fi
 
