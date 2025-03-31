@@ -146,7 +146,7 @@ runs:
         fi
 
     - name: Post PR Comment
-      if: ${{ inputs.post_pr_comment == 'true' && inputs.pr_number != '' && contains(run.steps.deploy.outputs.status, 'success') }}
+      if: ${{ inputs.post_pr_comment == 'true' && inputs.pr_number != '' && contains(steps.deploy.outputs.status, 'success') }}
       uses: ./.github/actions/post-pr-comment
       with:
         github-token: ${{ inputs.gh_token }}
@@ -154,7 +154,7 @@ runs:
         pr-number: ${{ inputs.pr_number }}
 
     - name: Send Success Notification
-      if: ${{ inputs.notify_slack == 'true' && contains(run.steps.deploy.outputs.status, 'success') }}
+      if: ${{ inputs.notify_slack == 'true' && contains(steps.deploy.outputs.status, 'success') }}
       uses: ./.github/actions/slack-notification
       with:
         slack_token: ${{ inputs.slack_token }}
