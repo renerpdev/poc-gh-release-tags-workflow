@@ -5,7 +5,7 @@ This project is deployed on Vercel with three different environments: production
 ## Environment Links
 
 ### Production
-The production environment represents the live version of the application that is accessible to end-users.
+The production environment represents the live version of the application that is accessible to end-users. 
 
 **URL:** [https://poc-gh-release-tags-workflow.vercel.app](https://poc-gh-release-tags-workflow.vercel.app)
 
