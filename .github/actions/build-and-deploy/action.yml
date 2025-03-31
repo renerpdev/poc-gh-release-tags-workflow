@@ -134,7 +134,6 @@ runs:
           npx vercel deploy \
           --prebuilt \
           --archive=tgz \
-          # TODO: remove, this is just to break the workflo
           --token=${{ inputs.vercel_token }} \
           $VERCEL_DEPLOY_FLAG \
         )
