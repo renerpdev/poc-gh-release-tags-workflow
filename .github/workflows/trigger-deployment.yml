@@ -40,6 +40,8 @@ jobs:
       CI: true
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Downloads also the tags
 
       - name: Build and Deploy
         uses: ./.github/actions/build-and-deploy
