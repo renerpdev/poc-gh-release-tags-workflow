@@ -117,6 +117,7 @@ runs:
         npx vercel pull --yes --environment=$DEPLOYMENT_TARGET --token=${{ inputs.vercel_token }}
 
     - name: Build Project Locally
+      id: build
       shell: bash
       env:
         NEXT_PUBLIC_GIT_TAG: ${{ env.GIT_TAG }}
@@ -140,14 +141,6 @@ runs:
         echo "deployment_url=$DEPLOY_URL" >> $GITHUB_ENV
         echo "Vercel Deployment URL: $DEPLOY_URL"
 
-    - name: Post PR Comment
-      if: ${{ inputs.post_pr_comment == 'true' && inputs.pr_number != '' }}
-      uses: ./.github/actions/post-pr-comment
-      with:
-        github-token: ${{ inputs.gh_token }}
-        deployment-url: ${{ env.deployment_url }}
-        pr-number: ${{ inputs.pr_number }}
-
     - name: Send Slack Notification
       if: ${{ inputs.notify_slack == 'true' }}
       uses: ./.github/actions/slack-notification
@@ -164,3 +157,29 @@ runs:
         repo_owner: ${{ github.repository_owner }}
         repo_name: ${{ github.event.repository.name }}
         head_ref: ${{ inputs.ref }}
+
+    - name: Send Error Notification
+      if: ${{ inputs.notify_slack == 'true' && failure() }}
+      uses: ./.github/actions/slack-notification
+      with:
+        slack_token: ${{ inputs.slack_token }}
+        slack_channel_id: ${{ inputs.slack_channel_id }}
+        deployment_url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        git_tag: ${{ env.GIT_TAG }}
+        git_commit_hash: ${{ env.GIT_COMMIT_HASH }}
+        build_time: ${{ env.BUILD_TIME }}
+        environment: ${{ inputs.environment }}
+        is_preview: ${{ inputs.is_preview }}
+        pr_number: ${{ inputs.pr_number }}
+        repo_owner: ${{ github.repository_owner }}
+        repo_name: ${{ github.event.repository.name }}
+        head_ref: ${{ inputs.ref }}
+        error_message: "Deployment failed. Click the link below to view the GitHub Actions logs and debug the issue."
+
+    - name: Post PR Comment
+      if: ${{ inputs.post_pr_comment == 'true' && inputs.pr_number != '' && steps.deploy.outcome == 'success' }}
+      uses: ./.github/actions/post-pr-comment
+      with:
+        github-token: ${{ inputs.gh_token }}
+        deployment-url: ${{ env.deployment_url }}
+        pr-number: ${{ inputs.pr_number }}

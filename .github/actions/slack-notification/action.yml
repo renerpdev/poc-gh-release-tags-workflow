@@ -43,6 +43,10 @@ inputs:
     description: "The head reference or branch name for preview deployments"
     required: false
     default: ${{ github.head_ref || github.ref_name }}
+  error_message:
+    description: "Error message to display if deployment failed"
+    required: false
+    default: ""
 runs:
   using: "composite"
   steps:
@@ -123,13 +127,23 @@ runs:
           fi
         fi
 
+        # Handle error messages
+        if [ -n "${{ inputs.error_message }}" ]; then
+          ENV_TITLE="*Deployment Failed!* :warning:"
+          ENV_EMOJI=":x:"
+          ENV_SUBTITLE="${{ inputs.error_message }}"
+          DEPLOYMENT_INFO=">:x: Deployment failed"
+        else
+          DEPLOYMENT_INFO=">:link: <${{ inputs.deployment_url }}|Visit the site>"
+        fi
+
         # Capture response to debug potential errors
         RESPONSE=$(curl -s -X POST \
         -H "Authorization: Bearer ${{ inputs.slack_token }}" \
         -H "Content-type: application/json" \
         --data '{
           "channel": "${{ inputs.slack_channel_id }}",
-          "text": "'"$ENV_EMOJI"' '"$ENV_TITLE"'\n>'"$ENV_SUBTITLE"'\n>:link: <${{ inputs.deployment_url }}|Visit the site>'"$PR_LINK"'\n>:hash: Commit: ${{ inputs.git_commit_hash }}\n>:alarm_clock: Deployed at ${{ inputs.build_time }}"
+          "text": "'"$ENV_EMOJI"' '"$ENV_TITLE"'\n>'"$ENV_SUBTITLE"'\n'"$DEPLOYMENT_INFO"'"$PR_LINK"'\n>:hash: Commit: ${{ inputs.git_commit_hash }}\n>:alarm_clock: Deployed at ${{ inputs.build_time }}"
         }' \
         https://slack.com/api/chat.postMessage)
         
