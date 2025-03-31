@@ -141,10 +141,7 @@ runs:
         RESPONSE=$(curl -s -X POST \
         -H "Authorization: Bearer ${{ inputs.slack_token }}" \
         -H "Content-type: application/json" \
-        --data '{
-          "channel": "${{ inputs.slack_channel_id }}",
-          "text": "'"$ENV_EMOJI"' '"$ENV_TITLE"'\n>'"$ENV_SUBTITLE"'\n'"$DEPLOYMENT_INFO"'"$PR_LINK"'\n>:hash: Commit: ${{ inputs.git_commit_hash }}\n>:alarm_clock: Deployed at ${{ inputs.build_time }}"
-        }' \
+        --data "{\"channel\":\"${{ inputs.slack_channel_id }}\",\"text\":\"$ENV_EMOJI $ENV_TITLE\n>$ENV_SUBTITLE\n$DEPLOYMENT_INFO$PR_LINK\n>:hash: Commit: ${{ inputs.git_commit_hash }}\n>:alarm_clock: Deployed at ${{ inputs.build_time }}\"}" \
         https://slack.com/api/chat.postMessage)
         
         # Check for errors
