@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Downloads also the tags
           persist-credentials: false
@@ -211,7 +211,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ format('{0}{1}', inputs.is_draft == true && 'Preview-' || '', inputs.is_prerelease == true && 'Staging' || 'Production') }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build and Deploy
         uses: ./.github/actions/build-and-deploy

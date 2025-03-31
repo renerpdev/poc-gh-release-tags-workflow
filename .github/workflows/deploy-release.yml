@@ -22,7 +22,9 @@ jobs:
     env:
       CI: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Downloads also the tags
 
       - name: Deploy to Production
         uses: ./.github/actions/build-and-deploy
