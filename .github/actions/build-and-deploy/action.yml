@@ -134,14 +134,23 @@ runs:
           npx vercel deploy \
           --prebuilt \
           --archive=tgz \
+          # TODO: remove, this is just to break the workflow
           --token=${{ inputs.vercel_token }} \
           $VERCEL_DEPLOY_FLAG \
         )
         echo "deployment_url=$DEPLOY_URL" >> $GITHUB_ENV
         echo "Vercel Deployment URL: $DEPLOY_URL"
 
+    - name: Post PR Comment
+      if: ${{ inputs.post_pr_comment == 'true' && inputs.pr_number != '' && steps.deploy.outcome == 'success' }}
+      uses: ./.github/actions/post-pr-comment
+      with:
+        github-token: ${{ inputs.gh_token }}
+        deployment-url: ${{ env.deployment_url }}
+        pr-number: ${{ inputs.pr_number }}
+
     - name: Send Slack Notification
-      if: ${{ inputs.notify_slack == 'true' }}
+      if: ${{ inputs.notify_slack == 'true' && steps.deploy.outcome == 'success' }}
       uses: ./.github/actions/slack-notification
       with:
         slack_token: ${{ inputs.slack_token }}
@@ -158,7 +167,7 @@ runs:
         head_ref: ${{ inputs.ref }}
 
     - name: Send Error Notification
-      if: ${{ inputs.notify_slack == 'true' && failure() }}
+      if: ${{ inputs.notify_slack == 'true' && (steps.build.outcome == 'failure' || steps.deploy.outcome == 'failure') }}
       uses: ./.github/actions/slack-notification
       with:
         slack_token: ${{ inputs.slack_token }}
@@ -174,11 +183,3 @@ runs:
         repo_name: ${{ github.event.repository.name }}
         head_ref: ${{ inputs.ref }}
         error_message: "Deployment failed. Click the link below to view the GitHub Actions logs and debug the issue."
-
-    - name: Post PR Comment
-      if: ${{ inputs.post_pr_comment == 'true' && inputs.pr_number != '' && steps.deploy.outcome == 'success' }}
-      uses: ./.github/actions/post-pr-comment
-      with:
-        github-token: ${{ inputs.gh_token }}
-        deployment-url: ${{ env.deployment_url }}
-        pr-number: ${{ inputs.pr_number }}
