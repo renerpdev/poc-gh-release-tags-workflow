@@ -171,7 +171,7 @@ runs:
         head_ref: ${{ inputs.ref }}
 
     - name: Send Error Notification
-      if: ${{ inputs.notify_slack == 'true' && contains(run.steps.deploy.outputs.status, 'failure') }}
+      if: ${{ inputs.notify_slack == 'true' && contains(steps.deploy.outputs.status, 'failure') }}
       uses: ./.github/actions/slack-notification
       with:
         slack_token: ${{ inputs.slack_token }}
