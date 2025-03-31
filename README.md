@@ -2,7 +2,7 @@
 
 This project is deployed on Vercel with three different environments: production, staging, and development.
 
-## Environment Links
+## Environment Links 
 
 ### Production
 The production environment represents the live version of the application that is accessible to end-users.
