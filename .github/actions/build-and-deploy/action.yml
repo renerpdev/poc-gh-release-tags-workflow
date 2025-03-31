@@ -140,9 +140,10 @@ runs:
         )
         echo "deployment_url=$DEPLOY_URL" >> $GITHUB_ENV
         echo "Vercel Deployment URL: $DEPLOY_URL"
+        echo "DEPLOYMENT_SUCCESS=true" >> $GITHUB_ENV
 
     - name: Post PR Comment
-      if: ${{ inputs.post_pr_comment == 'true' && inputs.pr_number != '' && steps.deploy.outcome == 'success' }}
+      if: ${{ inputs.post_pr_comment == 'true' && inputs.pr_number != '' && env.DEPLOYMENT_SUCCESS == 'true' }}
       uses: ./.github/actions/post-pr-comment
       with:
         github-token: ${{ inputs.gh_token }}
@@ -150,7 +151,7 @@ runs:
         pr-number: ${{ inputs.pr_number }}
 
     - name: Send Slack Notification
-      if: ${{ inputs.notify_slack == 'true' && steps.deploy.outcome == 'success' }}
+      if: ${{ inputs.notify_slack == 'true' && env.DEPLOYMENT_SUCCESS == 'true' }}
       uses: ./.github/actions/slack-notification
       with:
         slack_token: ${{ inputs.slack_token }}
@@ -167,7 +168,7 @@ runs:
         head_ref: ${{ inputs.ref }}
 
     - name: Send Error Notification
-      if: ${{ inputs.notify_slack == 'true' && (steps.build.outcome == 'failure' || steps.deploy.outcome == 'failure') }}
+      if: ${{ inputs.notify_slack == 'true' && env.DEPLOYMENT_SUCCESS != 'true' }}
       uses: ./.github/actions/slack-notification
       with:
         slack_token: ${{ inputs.slack_token }}
