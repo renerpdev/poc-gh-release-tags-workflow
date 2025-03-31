@@ -30,12 +30,14 @@ on:
 
 permissions:
   contents: write
-  actions: write 
+  actions: write
 
 jobs:
   Create-Release:
     name: Create ${{ format('{0} {1}{2}', inputs.release_type, inputs.is_prerelease == true && 'Pre-release' || 'Release', inputs.is_draft == true && ' (Draft)' || '') }}
     runs-on: ubuntu-latest
+    env:
+      CI: true
     outputs:
       next_tag: ${{ env.next_tag }}
 

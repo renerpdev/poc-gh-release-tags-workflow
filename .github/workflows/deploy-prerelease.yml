@@ -11,7 +11,7 @@ concurrency:
 
 permissions:
   contents: read
-  actions: write 
+  actions: write
 
 jobs:
   Deploy-Staging:
@@ -19,13 +19,15 @@ jobs:
     if: (github.event.release.prerelease == true && github.event.release.draft == false)
     runs-on: ubuntu-latest
     environment: Staging
+    env:
+      CI: true
     steps:
       - uses: actions/checkout@v3
 
       - name: Deploy to Staging
         uses: ./.github/actions/build-and-deploy
         with:
-          environment: 'Staging'
+          environment: "Staging"
           is_preview: ${{ github.event.release.draft }}
           ref: ${{ github.ref }}
           notify_slack: ${{ vars.ENABLE_SLACK_NOTIFICATIONS == 'true' }}

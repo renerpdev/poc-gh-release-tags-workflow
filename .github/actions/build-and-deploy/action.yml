@@ -1,48 +1,48 @@
-name: 'Deploy to Vercel'
-description: 'Deploy to Vercel with environment-specific secrets and notifications'
+name: "Deploy to Vercel"
+description: "Deploy to Vercel with environment-specific secrets and notifications"
 
-inputs: 
+inputs:
   environment:
-    description: 'The environment to deploy to (Development, Staging, Production)'
+    description: "The environment to deploy to (Development, Staging, Production)"
     required: true
   is_preview:
-    description: 'Whether this is a preview deployment'
+    description: "Whether this is a preview deployment"
     required: true
   notify_slack:
-    description: 'Whether to send Slack notifications'
+    description: "Whether to send Slack notifications"
     required: false
-    default: 'true'
+    default: "true"
   post_pr_comment:
-    description: 'Whether to post a comment on the PR'
+    description: "Whether to post a comment on the PR"
     required: false
-    default: 'true'
+    default: "true"
   pr_number:
-    description: 'The PR number to comment on'
+    description: "The PR number to comment on"
     required: false
   ref:
-    description: 'The git ref to deploy'
+    description: "The git ref to deploy"
     required: false
     default: ${{ github.ref }}
   vercel_org_id:
-    description: 'Vercel organization ID'
+    description: "Vercel organization ID"
     required: true
   vercel_token:
-    description: 'Vercel authentication token'
+    description: "Vercel authentication token"
     required: true
   vercel_project_id:
-    description: 'Vercel project ID'
+    description: "Vercel project ID"
     required: true
   slack_token:
-    description: 'Slack authentication token'
+    description: "Slack authentication token"
     required: true
   slack_channel_id:
-    description: 'Slack channel ID for notifications'
+    description: "Slack channel ID for notifications"
     required: true
   gh_token:
-    description: 'GitHub authentication token'
+    description: "GitHub authentication token"
     required: true
   vercel_team:
-    description: 'Vercel team name'
+    description: "Vercel team name"
     required: false
 
 runs:
@@ -133,6 +133,7 @@ runs:
           npx vercel deploy \
           --prebuilt \
           --archive=tgz \
+          # uncomment this only for non-personal projects --scope=${{ inputs.vercel_team }} \
           --token=${{ inputs.vercel_token }} \
           $VERCEL_DEPLOY_FLAG \
         )
@@ -162,4 +163,4 @@ runs:
         pr_number: ${{ inputs.pr_number }}
         repo_owner: ${{ github.repository_owner }}
         repo_name: ${{ github.event.repository.name }}
-        head_ref: ${{ inputs.ref }} 
+        head_ref: ${{ inputs.ref }}

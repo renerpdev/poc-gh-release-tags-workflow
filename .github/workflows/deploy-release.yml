@@ -11,21 +11,23 @@ concurrency:
 
 permissions:
   contents: read
-  actions: write 
-  
+  actions: write
+
 jobs:
   Deploy-Production:
     name: Deploy to Production
     if: (github.event.release.prerelease == false && github.event.release.draft == false)
     runs-on: ubuntu-latest
     environment: Production
+    env:
+      CI: true
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Deploy to Production
         uses: ./.github/actions/build-and-deploy
         with:
-          environment: 'Production'
+          environment: "Production"
           is_preview: ${{ github.event.release.draft }}
           ref: ${{ github.ref }}
           notify_slack: ${{ vars.ENABLE_SLACK_NOTIFICATIONS == 'true' }}
